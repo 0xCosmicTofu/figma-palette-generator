@@ -42,17 +42,27 @@ async function generatePalette(settings: PaletteSettings): Promise<void> {
 
     const selectedNode = figma.currentPage.selection[0];
     
-    // Validate selection is a frame
-    if (!selectedNode || selectedNode.type !== 'FRAME') {
-      figma.notify('Please select a frame (not a group or other element)', { error: true });
+    // Validate selection is a frame or a single image
+    if (!selectedNode) {
+      figma.notify('Please select a frame containing images or a single image', { error: true });
       return;
     }
 
-    // Extract images from the frame
-    const images = extractImagesFromFrame(selectedNode);
+    let images: ImageNode[] = [];
+    
+    if (selectedNode.type === 'FRAME') {
+      // Extract images from the frame
+      images = extractImagesFromFrame(selectedNode);
+    } else if (selectedNode.type === 'RECTANGLE' && isImageNode(selectedNode)) {
+      // Handle single image selection
+      images = extractSingleImage(selectedNode);
+    } else {
+      figma.notify('Please select a frame containing images or a single image rectangle', { error: true });
+      return;
+    }
     
     if (images.length === 0) {
-      figma.notify('No images found in the selected frame', { error: true });
+      figma.notify('No images found in selection. Please select a frame with images or a single image rectangle.', { error: true });
       return;
     }
 
@@ -123,6 +133,45 @@ function extractImagesFromFrame(frame: FrameNode): ImageNode[] {
   
   traverse(frame);
   return images;
+}
+
+/**
+ * Check if a rectangle node contains an image fill
+ */
+function isImageNode(node: RectangleNode): boolean {
+  if (!node.fills || !Array.isArray(node.fills) || node.fills.length === 0) {
+    return false;
+  }
+  
+  const fill = node.fills[0];
+  return fill.type === 'IMAGE' && fill.imageHash !== undefined;
+}
+
+/**
+ * Extract a single image from a rectangle node
+ */
+function extractSingleImage(node: RectangleNode): ImageNode[] {
+  if (!node.fills || !Array.isArray(node.fills) || node.fills.length === 0) {
+    return [];
+  }
+  
+  const fill = node.fills[0];
+  if (fill.type === 'IMAGE' && fill.imageHash) {
+    const image = figma.getImageByHash(fill.imageHash);
+    if (image) {
+      const imageNode: ImageNode = {
+        type: 'RECTANGLE',
+        fills: [fill],
+        width: node.width,
+        height: node.height,
+        x: node.x,
+        y: node.y
+      } as ImageNode;
+      return [imageNode];
+    }
+  }
+  
+  return [];
 }
 
 /**
