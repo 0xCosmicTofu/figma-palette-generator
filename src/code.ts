@@ -792,7 +792,7 @@ async function createPaletteFrames(palette: PaletteData, settings: PaletteSettin
     
     console.log('Creating light and dark mode frames...');
     // Create light and dark mode frames
-    await createModeSpecificFrames(mainFrame, palette);
+    await createModeSpecificFrames(mainFrame, palette, settings);
     
     console.log('Creating monotone scale...');
     // Create monotone scale
@@ -996,7 +996,7 @@ async function createHarmonyPalettes(parentFrame: FrameNode, palette: PaletteDat
 /**
  * Create light and dark mode specific frames
  */
-async function createModeSpecificFrames(parentFrame: FrameNode, palette: PaletteData): Promise<void> {
+async function createModeSpecificFrames(parentFrame: FrameNode, palette: PaletteData, settings: PaletteSettings): Promise<void> {
   try {
     console.log('Creating light and dark mode frames...');
     
@@ -1018,7 +1018,7 @@ async function createModeSpecificFrames(parentFrame: FrameNode, palette: Palette
     
     // Add title
     const lightTitle = figma.createText();
-    lightTitle.characters = "Light Mode";
+    lightTitle.characters = settings.accessibility ? "Light Mode (WCAG Accessible)" : "Light Mode";
     lightTitle.fontSize = 18;
     lightTitle.fills = [{ type: 'SOLID', color: { r: 0.2, g: 0.2, b: 0.2 } }];
     lightFrame.appendChild(lightTitle);
@@ -1036,8 +1036,11 @@ async function createModeSpecificFrames(parentFrame: FrameNode, palette: Palette
     lightSwatchesContainer.paddingBottom = 0;
     lightFrame.appendChild(lightSwatchesContainer);
     
+    // Use accessible colors if accessibility is enabled, otherwise use regular light mode colors
+    const lightColors = settings.accessibility ? palette.accessibleLight : palette.lightMode;
+    console.log('Using light mode colors:', settings.accessibility ? 'accessible' : 'regular', lightColors.length);
+    
     // Create light mode color swatches
-    const lightColors = palette.lightMode;
     for (let i = 0; i < Math.min(lightColors.length, 15); i++) {
       const swatch = figma.createRectangle();
       swatch.name = `LightMode-${i}`;
@@ -1080,7 +1083,7 @@ async function createModeSpecificFrames(parentFrame: FrameNode, palette: Palette
     
     // Add title
     const darkTitle = figma.createText();
-    darkTitle.characters = "Dark Mode";
+    darkTitle.characters = settings.accessibility ? "Dark Mode (WCAG Accessible)" : "Dark Mode";
     darkTitle.fontSize = 18;
     darkTitle.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
     darkFrame.appendChild(darkTitle);
@@ -1098,8 +1101,11 @@ async function createModeSpecificFrames(parentFrame: FrameNode, palette: Palette
     darkSwatchesContainer.paddingBottom = 0;
     darkFrame.appendChild(darkSwatchesContainer);
     
+    // Use accessible colors if accessibility is enabled, otherwise use regular dark mode colors
+    const darkColors = settings.accessibility ? palette.accessibleDark : palette.darkMode;
+    console.log('Using dark mode colors:', settings.accessibility ? 'accessible' : 'regular', darkColors.length);
+    
     // Create dark mode color swatches
-    const darkColors = palette.darkMode;
     for (let i = 0; i < Math.min(darkColors.length, 15); i++) {
       const swatch = figma.createRectangle();
       swatch.name = `DarkMode-${i}`;
