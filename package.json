@@ -1,0 +1,31 @@
+{
+  "name": "palette-generator",
+  "version": "1.0.0",
+  "description": "A Figma plugin that automates the creation of systematic color palettes from moodboards and image collections",
+  "main": "code.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "watch": "tsc -p tsconfig.json --watch",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "dev": "npm run watch"
+  },
+  "devDependencies": {
+    "@figma/eslint-plugin-figma-plugins": "^0.16.1",
+    "@figma/plugin-typings": "^1.117.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "figma",
+    "plugin",
+    "color",
+    "palette",
+    "design",
+    "automation"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}

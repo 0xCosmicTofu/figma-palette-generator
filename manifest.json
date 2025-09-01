@@ -1,0 +1,19 @@
+{
+  "name": "Palette Generator",
+  "id": "palette-generator-plugin",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma"],
+  "networkAccess": {
+    "allowedDomains": ["none"]
+  },
+  "permissions": [],
+  "relaunchButtons": [
+    {
+      "command": "generate",
+      "name": "Generate Palette",
+      "multipleSelection": false
+    }
+  ]
+}
