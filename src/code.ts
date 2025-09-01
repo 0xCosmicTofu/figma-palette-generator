@@ -831,8 +831,8 @@ async function createColorScales(parentFrame: FrameNode, palette: PaletteData): 
       
       const scaleFrame = figma.createFrame();
       scaleFrame.name = `${scaleNames[i]} Color Scale`;
-      scaleFrame.resize(300, 400);
-      scaleFrame.fills = [{ type: 'SOLID', color: { r: 0.95, g: 0.95, b: 0.95 } }];
+      scaleFrame.resize(564, 84);
+      scaleFrame.fills = [{ type: 'SOLID', color: { r: 0.949, g: 0.949, b: 0.949 } }]; // #f2f2f2
       
       // Enable Auto Layout for color scale frame
       scaleFrame.layoutMode = "VERTICAL";
@@ -857,19 +857,38 @@ async function createColorScales(parentFrame: FrameNode, palette: PaletteData): 
       swatchesContainer.layoutMode = "HORIZONTAL";
       swatchesContainer.primaryAxisSizingMode = "AUTO";
       swatchesContainer.counterAxisSizingMode = "AUTO";
+      swatchesContainer.primaryAxisAlignItems = "CENTER"; // Vertical centering
       swatchesContainer.itemSpacing = 5;
       swatchesContainer.paddingLeft = 0;
       swatchesContainer.paddingRight = 0;
       swatchesContainer.paddingTop = 0;
       swatchesContainer.paddingBottom = 0;
+      swatchesContainer.fills = []; // No fill (transparent)
       scaleFrame.appendChild(swatchesContainer);
       
       // Create color swatches
       const scaleSteps = ['000', '100', '200', '300', '400', '500', '600', '700', '800', '900'];
       for (let j = 0; j < scaleSteps.length; j++) {
+        // Create container for swatch + label (vertical layout)
+        const swatchContainer = figma.createFrame();
+        swatchContainer.name = `Frame ${Date.now() + j}`;
+        swatchContainer.layoutMode = "VERTICAL";
+        swatchContainer.primaryAxisSizingMode = "AUTO";
+        swatchContainer.counterAxisSizingMode = "AUTO";
+        swatchContainer.primaryAxisAlignItems = "CENTER";
+        swatchContainer.counterAxisAlignItems = "CENTER";
+        swatchContainer.itemSpacing = 0;
+        swatchContainer.paddingLeft = 0;
+        swatchContainer.paddingRight = 0;
+        swatchContainer.paddingTop = 0;
+        swatchContainer.paddingBottom = 0;
+        swatchContainer.fills = [];
+        
+        // Create color swatch
         const swatch = figma.createRectangle();
         swatch.name = `${scaleNames[i]}-${scaleSteps[j]}`;
-        swatch.resize(25, 25);
+        swatch.resize(40, 40);
+        swatch.cornerRadius = 4;
         
         const color = scales[i]![scaleSteps[j] as keyof ColorScale];
         console.log(`Creating swatch ${scaleSteps[j]} with color:`, color);
@@ -883,14 +902,33 @@ async function createColorScales(parentFrame: FrameNode, palette: PaletteData): 
         }
         swatch.strokes = [{ type: 'SOLID', color: { r: 0.8, g: 0.8, b: 0.8 } }];
         swatch.strokeWeight = 1;
-        swatchesContainer.appendChild(swatch);
+        swatchContainer.appendChild(swatch);
+        
+        // Create label container
+        const labelContainer = figma.createFrame();
+        labelContainer.name = `Frame ${Date.now() + j + 1000}`;
+        labelContainer.layoutMode = "HORIZONTAL";
+        labelContainer.primaryAxisSizingMode = "AUTO";
+        labelContainer.counterAxisSizingMode = "AUTO";
+        labelContainer.primaryAxisAlignItems = "CENTER";
+        labelContainer.counterAxisAlignItems = "CENTER";
+        labelContainer.itemSpacing = 8;
+        labelContainer.paddingLeft = 0;
+        labelContainer.paddingRight = 0;
+        labelContainer.paddingTop = 0;
+        labelContainer.paddingBottom = 0;
+        labelContainer.resize(40, 40);
+        labelContainer.fills = [];
         
         // Add color label
         const label = figma.createText();
         label.characters = scaleSteps[j] || '000';
         label.fontSize = 10;
         label.fills = [{ type: 'SOLID', color: { r: 0.2, g: 0.2, b: 0.2 } }];
-        swatchesContainer.appendChild(label);
+        labelContainer.appendChild(label);
+        
+        swatchContainer.appendChild(labelContainer);
+        swatchesContainer.appendChild(swatchContainer);
       }
       
       parentFrame.appendChild(scaleFrame);
@@ -966,6 +1004,7 @@ async function createHarmonyPalettes(parentFrame: FrameNode, palette: PaletteDat
       swatchesContainer.paddingRight = 0;
       swatchesContainer.paddingTop = 0;
       swatchesContainer.paddingBottom = 0;
+      swatchesContainer.fills = []; // No fill (transparent)
       harmonyFrame.appendChild(swatchesContainer);
       
       // Create harmony color swatches
@@ -976,6 +1015,7 @@ async function createHarmonyPalettes(parentFrame: FrameNode, palette: PaletteDat
         const swatch = figma.createRectangle();
         swatch.name = `${harmonyType.name || 'Unknown'}-${j}`;
         swatch.resize(40, 40);
+        swatch.cornerRadius = 4;
         swatch.fills = [{ type: 'SOLID', color: colors[j] || { r: 0.5, g: 0.5, b: 0.5 } }];
         swatch.strokes = [{ type: 'SOLID', color: { r: 0.8, g: 0.8, b: 0.8 } }];
         swatch.strokeWeight = 1;
@@ -1029,11 +1069,13 @@ async function createModeSpecificFrames(parentFrame: FrameNode, palette: Palette
     lightSwatchesContainer.layoutMode = "HORIZONTAL";
     lightSwatchesContainer.primaryAxisSizingMode = "AUTO";
     lightSwatchesContainer.counterAxisSizingMode = "AUTO";
+    lightSwatchesContainer.primaryAxisAlignItems = "CENTER"; // Vertical centering
     lightSwatchesContainer.itemSpacing = 10;
     lightSwatchesContainer.paddingLeft = 0;
     lightSwatchesContainer.paddingRight = 0;
     lightSwatchesContainer.paddingTop = 0;
     lightSwatchesContainer.paddingBottom = 0;
+    lightSwatchesContainer.fills = []; // No fill (transparent)
     lightFrame.appendChild(lightSwatchesContainer);
     
     // Use accessible colors if accessibility is enabled, otherwise use regular light mode colors
@@ -1042,9 +1084,26 @@ async function createModeSpecificFrames(parentFrame: FrameNode, palette: Palette
     
     // Create light mode color swatches
     for (let i = 0; i < Math.min(lightColors.length, 15); i++) {
+      // Create container for swatch + label (vertical layout)
+      const swatchContainer = figma.createFrame();
+      swatchContainer.name = `Frame ${Date.now() + i}`;
+      swatchContainer.layoutMode = "VERTICAL";
+      swatchContainer.primaryAxisSizingMode = "AUTO";
+      swatchContainer.counterAxisSizingMode = "AUTO";
+      swatchContainer.primaryAxisAlignItems = "CENTER";
+      swatchContainer.counterAxisAlignItems = "CENTER";
+      swatchContainer.itemSpacing = 0;
+      swatchContainer.paddingLeft = 0;
+      swatchContainer.paddingRight = 0;
+      swatchContainer.paddingTop = 0;
+      swatchContainer.paddingBottom = 0;
+      swatchContainer.fills = [];
+      
+      // Create color swatch
       const swatch = figma.createRectangle();
       swatch.name = `LightMode-${i}`;
       swatch.resize(40, 40);
+      swatch.cornerRadius = 4;
       
       const color = lightColors[i];
       if (color) {
@@ -1055,21 +1114,40 @@ async function createModeSpecificFrames(parentFrame: FrameNode, palette: Palette
       
       swatch.strokes = [{ type: 'SOLID', color: { r: 0.8, g: 0.8, b: 0.8 } }];
       swatch.strokeWeight = 1;
-      lightSwatchesContainer.appendChild(swatch);
+      swatchContainer.appendChild(swatch);
+      
+      // Create label container
+      const labelContainer = figma.createFrame();
+      labelContainer.name = `Frame ${Date.now() + i + 2000}`;
+      labelContainer.layoutMode = "HORIZONTAL";
+      labelContainer.primaryAxisSizingMode = "AUTO";
+      labelContainer.counterAxisSizingMode = "AUTO";
+      labelContainer.primaryAxisAlignItems = "CENTER";
+      labelContainer.counterAxisAlignItems = "CENTER";
+      labelContainer.itemSpacing = 8;
+      labelContainer.paddingLeft = 0;
+      labelContainer.paddingRight = 0;
+      labelContainer.paddingTop = 0;
+      labelContainer.paddingBottom = 0;
+      labelContainer.resize(40, 40);
+      labelContainer.fills = [];
       
       // Add color labels
       const label = figma.createText();
       label.characters = `L${i + 1}`;
       label.fontSize = 10;
       label.fills = [{ type: 'SOLID', color: { r: 0.2, g: 0.2, b: 0.2 } }];
-      lightSwatchesContainer.appendChild(label);
+      labelContainer.appendChild(label);
+      
+      swatchContainer.appendChild(labelContainer);
+      lightSwatchesContainer.appendChild(swatchContainer);
     }
     
     // Create Dark Mode frame
     const darkFrame = figma.createFrame();
     darkFrame.name = "Dark Mode Palette";
     darkFrame.resize(600, 400);
-    darkFrame.fills = []; // Transparent background so white text is visible
+    darkFrame.fills = [{ type: 'SOLID', color: { r: 0.2, g: 0.2, b: 0.2 } }]; // #333333
     
     // Enable Auto Layout for dark mode frame
     darkFrame.layoutMode = "VERTICAL";
@@ -1094,11 +1172,13 @@ async function createModeSpecificFrames(parentFrame: FrameNode, palette: Palette
     darkSwatchesContainer.layoutMode = "HORIZONTAL";
     darkSwatchesContainer.primaryAxisSizingMode = "AUTO";
     darkSwatchesContainer.counterAxisSizingMode = "AUTO";
+    darkSwatchesContainer.primaryAxisAlignItems = "CENTER"; // Vertical centering
     darkSwatchesContainer.itemSpacing = 10;
     darkSwatchesContainer.paddingLeft = 0;
     darkSwatchesContainer.paddingRight = 0;
     darkSwatchesContainer.paddingTop = 0;
     darkSwatchesContainer.paddingBottom = 0;
+    darkSwatchesContainer.fills = []; // No fill (transparent)
     darkFrame.appendChild(darkSwatchesContainer);
     
     // Use accessible colors if accessibility is enabled, otherwise use regular dark mode colors
@@ -1107,9 +1187,26 @@ async function createModeSpecificFrames(parentFrame: FrameNode, palette: Palette
     
     // Create dark mode color swatches
     for (let i = 0; i < Math.min(darkColors.length, 15); i++) {
+      // Create container for swatch + label (vertical layout)
+      const swatchContainer = figma.createFrame();
+      swatchContainer.name = `Frame ${Date.now() + i}`;
+      swatchContainer.layoutMode = "VERTICAL";
+      swatchContainer.primaryAxisSizingMode = "AUTO";
+      swatchContainer.counterAxisSizingMode = "AUTO";
+      swatchContainer.primaryAxisAlignItems = "CENTER";
+      swatchContainer.counterAxisAlignItems = "CENTER";
+      swatchContainer.itemSpacing = 0;
+      swatchContainer.paddingLeft = 0;
+      swatchContainer.paddingRight = 0;
+      swatchContainer.paddingTop = 0;
+      swatchContainer.paddingBottom = 0;
+      swatchContainer.fills = [];
+      
+      // Create color swatch
       const swatch = figma.createRectangle();
       swatch.name = `DarkMode-${i}`;
       swatch.resize(40, 40);
+      swatch.cornerRadius = 4;
       
       const color = darkColors[i];
       if (color) {
@@ -1120,14 +1217,33 @@ async function createModeSpecificFrames(parentFrame: FrameNode, palette: Palette
       
       swatch.strokes = [{ type: 'SOLID', color: { r: 0.8, g: 0.8, b: 0.8 } }];
       swatch.strokeWeight = 1;
-      darkSwatchesContainer.appendChild(swatch);
+      swatchContainer.appendChild(swatch);
+      
+      // Create label container
+      const labelContainer = figma.createFrame();
+      labelContainer.name = `Frame ${Date.now() + i + 3000}`;
+      labelContainer.layoutMode = "HORIZONTAL";
+      labelContainer.primaryAxisSizingMode = "AUTO";
+      labelContainer.counterAxisSizingMode = "AUTO";
+      labelContainer.primaryAxisAlignItems = "CENTER";
+      labelContainer.counterAxisAlignItems = "CENTER";
+      labelContainer.itemSpacing = 8;
+      labelContainer.paddingLeft = 0;
+      labelContainer.paddingRight = 0;
+      labelContainer.paddingTop = 0;
+      labelContainer.paddingBottom = 0;
+      labelContainer.resize(40, 40);
+      labelContainer.fills = [];
       
       // Add color labels
       const label = figma.createText();
       label.characters = `D${i + 1}`;
       label.fontSize = 10;
-      label.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
-      darkSwatchesContainer.appendChild(label);
+      label.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }]; // White text color for dark mode
+      labelContainer.appendChild(label);
+      
+      swatchContainer.appendChild(labelContainer);
+      darkSwatchesContainer.appendChild(swatchContainer);
     }
     
     parentFrame.appendChild(lightFrame);
@@ -1180,27 +1296,64 @@ async function createMonotoneScale(parentFrame: FrameNode): Promise<void> {
     swatchesContainer.paddingRight = 0;
     swatchesContainer.paddingTop = 0;
     swatchesContainer.paddingBottom = 0;
+    swatchesContainer.fills = []; // No fill (transparent)
     monotoneFrame.appendChild(swatchesContainer);
     
     // Create monotone swatches (white to black)
     const monotoneSteps = 9;
     for (let i = 0; i < monotoneSteps; i++) {
+      // Create container for swatch + label (vertical layout)
+      const swatchContainer = figma.createFrame();
+      swatchContainer.name = `Frame ${Date.now() + i}`;
+      swatchContainer.layoutMode = "VERTICAL";
+      swatchContainer.primaryAxisSizingMode = "AUTO";
+      swatchContainer.counterAxisSizingMode = "AUTO";
+      swatchContainer.primaryAxisAlignItems = "CENTER";
+      swatchContainer.counterAxisAlignItems = "CENTER";
+      swatchContainer.itemSpacing = 0;
+      swatchContainer.paddingLeft = 0;
+      swatchContainer.paddingRight = 0;
+      swatchContainer.paddingTop = 0;
+      swatchContainer.paddingBottom = 0;
+      swatchContainer.fills = [];
+      
+      // Create monotone swatch
       const swatch = figma.createRectangle();
       swatch.name = `Monotone-${i * 100}`;
-      swatch.resize(25, 25);
+      swatch.resize(40, 40);
+      swatch.cornerRadius = 4;
       
       const grayValue = i / (monotoneSteps - 1);
       swatch.fills = [{ type: 'SOLID', color: { r: grayValue, g: grayValue, b: grayValue } }];
       swatch.strokes = [{ type: 'SOLID', color: { r: 0.8, g: 0.8, b: 0.8 } }];
       swatch.strokeWeight = 1;
-      swatchesContainer.appendChild(swatch);
+      swatchContainer.appendChild(swatch);
+      
+      // Create label container
+      const labelContainer = figma.createFrame();
+      labelContainer.name = `Frame ${Date.now() + i + 4000}`;
+      labelContainer.layoutMode = "HORIZONTAL";
+      labelContainer.primaryAxisSizingMode = "AUTO";
+      labelContainer.counterAxisSizingMode = "AUTO";
+      labelContainer.primaryAxisAlignItems = "CENTER";
+      labelContainer.counterAxisAlignItems = "CENTER";
+      labelContainer.itemSpacing = 8;
+      labelContainer.paddingLeft = 0;
+      labelContainer.paddingRight = 0;
+      labelContainer.paddingTop = 0;
+      labelContainer.paddingBottom = 0;
+      labelContainer.resize(40, 40);
+      labelContainer.fills = [];
       
       // Add label
       const label = figma.createText();
       label.characters = `${i * 100}`;
       label.fontSize = 10;
       label.fills = [{ type: 'SOLID', color: { r: 0.2, g: 0.2, b: 0.2 } }];
-      swatchesContainer.appendChild(label);
+      labelContainer.appendChild(label);
+      
+      swatchContainer.appendChild(labelContainer);
+      swatchesContainer.appendChild(swatchContainer);
     }
     
     parentFrame.appendChild(monotoneFrame);

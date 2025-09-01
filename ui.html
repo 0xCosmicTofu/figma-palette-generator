@@ -242,6 +242,7 @@
             font-size: 13px;
             color: #333333;
             line-height: 1.4;
+            min-height: 20px;
         }
 
         .checkbox-item input {
@@ -258,11 +259,11 @@
             background-color: #e0e0e0;
             border-radius: 3px;
             margin-right: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: inline-block;
             transition: background-color 0.3s;
             flex-shrink: 0;
+            position: relative;
+            vertical-align: middle;
         }
 
         .checkbox-item input:checked ~ .checkmark {
@@ -272,6 +273,9 @@
         .checkmark:after {
             content: "";
             display: none;
+            position: absolute;
+            top: 2px;
+            left: 6px;
             width: 5px;
             height: 10px;
             border: solid white;
