@@ -1069,7 +1069,7 @@ async function createModeSpecificFrames(parentFrame: FrameNode, palette: Palette
     const darkFrame = figma.createFrame();
     darkFrame.name = "Dark Mode Palette";
     darkFrame.resize(600, 400);
-    darkFrame.fills = [{ type: 'SOLID', color: { r: 0.2, g: 0.2, b: 0.2 } }];
+    darkFrame.fills = []; // Transparent background so white text is visible
     
     // Enable Auto Layout for dark mode frame
     darkFrame.layoutMode = "VERTICAL";
