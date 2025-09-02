@@ -1292,14 +1292,36 @@ async function createPaletteFrames(palette: PaletteData, settings: PaletteSettin
   try {
     console.log('Starting palette frame creation...');
     
-    // Load fonts first (required for text nodes)
-    let fontFamily = { family: "Andale Mono", style: "Regular" };
-    try {
-      await figma.loadFontAsync({ family: "Andale Mono", style: "Regular" });
-      console.log('Andale Mono font loaded successfully');
-    } catch (error) {
-      console.warn('Andale Mono font not available, falling back to Inter');
-      fontFamily = { family: "Inter", style: "Regular" };
+    // Load fonts first - try system mono fonts for cross-platform compatibility
+    let fontFamily = { family: "Inter", style: "Regular" };
+    
+    // Try common system mono fonts across platforms
+    const systemMonoFonts = [
+      "SF Mono",           // macOS system mono
+      "Consolas",          // Windows system mono  
+      "Ubuntu Mono",       // Linux Ubuntu
+      "Roboto Mono",       // Android/Google
+      "Menlo",            // macOS fallback
+      "Monaco",           // macOS older systems
+      "Courier New"       // Universal fallback
+    ];
+    
+    let loadedMonoFont = false;
+    for (const monoFont of systemMonoFonts) {
+      try {
+        await figma.loadFontAsync({ family: monoFont, style: "Regular" });
+        fontFamily = { family: monoFont, style: "Regular" };
+        console.log(`Successfully loaded system mono font: ${monoFont}`);
+        loadedMonoFont = true;
+        break;
+      } catch (error) {
+        console.log(`${monoFont} not available, trying next...`);
+      }
+    }
+    
+    // Fallback to Inter if no mono fonts available
+    if (!loadedMonoFont) {
+      console.warn('No system mono fonts available, falling back to Inter');
       await figma.loadFontAsync({ family: "Inter", style: "Regular" });
     }
     
