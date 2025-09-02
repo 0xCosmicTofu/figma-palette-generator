@@ -1,17 +1,26 @@
 # Active Context - Figma Palette Generator
 
 ## Current Work Focus
-**Phase**: Project Planning & Memory Bank Creation
-**Status**: Memory bank structure established, ready for development planning
+**Phase**: Real Pixel-Level Color Extraction Implementation
+**Status**: Implementing true image analysis with Figma API capabilities
+**Date**: Major breakthrough - discovered actual API capabilities
 
-## Recent Decisions & Clarifications
+## BREAKTHROUGH: Real Pixel Access is Possible!
 
-### Core Functionality Confirmed
-1. **Input Method**: Selected frame containing bitmap images (max 10 recommended)
-2. **Processing Algorithm**: Median cut algorithm with size-based weighting
-3. **Color Scale System**: Material Design-inspired 000-900 scale (9 steps default, configurable 5-13)
-4. **Output Structure**: Organized frames with auto-spacing and plain language naming
-5. **Harmony Generation**: Auto-generated side-by-side comparisons for immediate visual feedback
+### Critical Discovery: API Capabilities Misunderstood
+**Problem Resolved**: Figma plugin API DOES provide pixel-level access through:
+- ✅ `figma.getImageByHash(imageHash)` - Get image object
+- ✅ `image.getBytesAsync()` - Get raw image bytes
+- ✅ Canvas API in UI - Decode and analyze pixels
+- ✅ Real color extraction from actual image data
+
+### New Direction: Hybrid Image + Color Theory Approach
+**Final Approach**: Combine real image analysis with intelligent color theory
+1. **Input Method**: Select image in Figma → Extract real pixel data
+2. **Primary Selection**: Smart algorithm identifies best primary candidates from image
+3. **Secondary/Tertiary Generation**: Color theory relationships that reference back to image colors
+4. **Visual Connection**: Maintains moodboard-to-palette workflow
+5. **Value Proposition**: "Extract real colors from your images and build complete design systems"
 
 ### Technical Approach Validated
 1. **Color Space**: HSL for predictable tint/shade generation
@@ -28,19 +37,23 @@
 ## Current Status
 - ✅ Project scope and requirements defined
 - ✅ Memory bank structure created
-- ✅ Technical approach validated
-- ✅ User experience principles established
 - ✅ Development environment setup completed
 - ✅ Basic plugin structure implemented
-- 🔄 Ready for core algorithm implementation
+- ✅ **BREAKTHROUGH**: Real pixel access capabilities discovered
+- ✅ **FINAL APPROACH**: Hybrid image + color theory validated
+- 🔄 Ready for real pixel-level color extraction implementation
 
-## Next Steps
+## Next Steps: Real Pixel Extraction Implementation
 
-### Immediate Actions Needed
-1. **Development Environment Setup**: Initialize Figma plugin project structure
-2. **Core Algorithm Implementation**: Implement median cut algorithm with weighting
-3. **Color Scale Generation**: Create 000-900 scale generation system
-4. **Basic UI Framework**: Set up plugin interface and controls
+### Immediate Actions Needed (Chunked for Usage Limits)
+1. **Task 1**: Implement `getImageByHash` and `getBytesAsync` in backend
+2. **Task 2**: Add image bytes transfer to UI via postMessage
+3. **Task 3**: Create canvas-based pixel analysis in UI
+4. **Task 4**: Implement proper median cut algorithm on real pixel data
+5. **Task 5**: Build smart primary color selection from extracted colors
+6. **Task 6**: Create hybrid secondary/tertiary generation (color theory + image colors)
+7. **Task 7**: Update UI to show extracted colors for user selection
+8. **Task 8**: Integrate with existing palette generation system
 
 ### Technical Decisions Pending
 1. **Build System**: Choose between Webpack and Vite for development
@@ -71,8 +84,16 @@
 - Error handling and recovery mechanisms
 - Testing strategy for reliable functionality
 
+## Key Requirements Confirmed
+1. **Image Selection**: User selects image in Figma (single image workflow)
+2. **Real Color Extraction**: Extract actual dominant colors from image pixels
+3. **Primary Selection**: Smart algorithm identifies best primary candidates
+4. **Hybrid Generation**: Secondary/tertiary based on color theory + image colors
+5. **Visual Connection**: Maintain moodboard-to-palette workflow
+6. **Complete Design System**: Generate full palette with scales and harmonies
+
 ## Questions for Clarification
-1. **Scale Granularity**: Should the 5-13 step range be user-configurable or preset options?
-2. **Harmony Types**: Are there specific color harmony rules to prioritize?
-3. **Error Handling**: How should the plugin handle invalid images or processing failures?
-4. **Customization**: What level of user control is needed for generated palettes?
+1. **Primary Selection Criteria**: What makes a color a good "primary" candidate?
+2. **Color Harmony Balance**: How much weight should image colors vs. color theory have?
+3. **User Control**: Should users be able to override algorithm-selected primaries?
+4. **Performance**: Acceptable processing time for pixel analysis?

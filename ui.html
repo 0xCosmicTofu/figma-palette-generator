@@ -133,6 +133,38 @@
             transform: translateX(20px);
         }
 
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .radio-item input[type="radio"] {
+            width: 16px;
+            height: 16px;
+            margin: 0;
+            cursor: pointer;
+            accent-color: #18a0fb;
+        }
+
+        .radio-item label {
+            font-size: 14px;
+            color: #333333;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .radio-item:hover label {
+            color: #18a0fb;
+        }
+
         .actions {
             display: flex;
             gap: 12px;
@@ -286,37 +318,806 @@
         .checkbox-item input:checked ~ .checkmark:after {
             display: block;
         }
+
+        /* Primary Color Selection Styles */
+        .primary-selection {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+            border: 2px solid #e9ecef;
+        }
+
+        .primary-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .primary-option {
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .primary-option:hover {
+            transform: scale(1.05);
+        }
+
+        .primary-option.selected {
+            transform: scale(1.1);
+            box-shadow: 0 0 0 3px #18a0fb;
+        }
+
+        .primary-color-swatch {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            position: relative;
+        }
+
+        .primary-option.custom .primary-color-swatch {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #ffeaa7);
+            background-size: 300% 300%;
+            animation: gradientShift 3s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .primary-option.custom .primary-color-swatch::after {
+            content: '+';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+
+        .primary-option-label {
+            text-align: center;
+            font-size: 11px;
+            color: #666;
+            margin-top: 4px;
+            max-width: 48px;
+            line-height: 1.2;
+        }
+
+        .primary-option.selected .primary-option-label {
+            color: #18a0fb;
+            font-weight: 600;
+        }
+
+        /* Color Picker Styles */
+        .primary-color-section {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .color-picker-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .color-picker {
+            width: 60px;
+            height: 40px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: none;
+        }
+
+        .color-picker::-webkit-color-swatch-wrapper {
+            padding: 0;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+        }
+
+        .color-picker::-webkit-color-swatch {
+            border: none;
+            border-radius: 4px;
+        }
+
+        .color-value {
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            background: #f0f0f0;
+            padding: 8px 12px;
+            border-radius: 4px;
+            min-width: 80px;
+            text-align: center;
+        }
+
+        /* Color Extraction Styles */
+        .color-extraction-section {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .extracted-colors {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .extracted-color {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .extracted-color:hover {
+            transform: scale(1.05);
+            border-color: #ddd;
+        }
+
+        .extracted-color.selected {
+            border-color: #18a0fb;
+            transform: scale(1.1);
+        }
+
+        .extracted-color.selected::after {
+            content: '';
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 20px;
+            height: 20px;
+            background: #18a0fb;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .extracted-color.primary::after { content: '1'; }
+        .extracted-color.secondary::after { content: '2'; }
+        .extracted-color.tertiary::after { content: '3'; }
+
+        .selection-status {
+            text-align: center;
+            padding: 12px;
+            background: #fff;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .selection-indicator {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .selection-status.active {
+            background: #e8f4fd;
+            border-color: #18a0fb;
+        }
+
+        .selection-status.active .selection-indicator {
+            color: #18a0fb;
+        }
+
+        /* New Color Picker Interface Styles */
+        .color-picker-section {
+            margin-bottom: 24px;
+        }
+
+        .selection-progress {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .selection-step {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            border-radius: 6px;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .selection-step.active {
+            border-color: #18a0fb;
+            background: #e8f4fd;
+        }
+
+        .selection-step.completed {
+            border-color: #28a745;
+            background: #e8f5e8;
+        }
+
+        .step-number {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #ddd;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .selection-step.active .step-number {
+            background: #18a0fb;
+        }
+
+        .selection-step.completed .step-number {
+            background: #28a745;
+        }
+
+        .step-info {
+            flex: 1;
+        }
+
+        .step-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+            display: block;
+        }
+
+        .step-color {
+            width: 100%;
+            height: 20px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            margin-top: 4px;
+            background: #f5f5f5;
+        }
+
+        .color-picker-interface {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .preset-colors {
+            margin-bottom: 20px;
+        }
+
+        .preset-colors label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .preset-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 6px;
+        }
+
+        .preset-color {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .preset-color:hover {
+            transform: scale(1.1);
+            border-color: #333;
+        }
+
+        .advanced-picker {
+            border-top: 1px solid #eee;
+            padding-top: 16px;
+        }
+
+        .advanced-picker label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .hsl-controls {
+            margin-bottom: 16px;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .control-group label {
+            width: 80px;
+            font-size: 12px;
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .slider {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: #ddd;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #18a0fb;
+            cursor: pointer;
+        }
+
+        .hue-slider {
+            background: linear-gradient(to right, 
+                hsl(0, 100%, 50%) 0%,
+                hsl(60, 100%, 50%) 16.66%,
+                hsl(120, 100%, 50%) 33.33%,
+                hsl(180, 100%, 50%) 50%,
+                hsl(240, 100%, 50%) 66.66%,
+                hsl(300, 100%, 50%) 83.33%,
+                hsl(360, 100%, 50%) 100%
+            );
+        }
+
+        .control-group span {
+            width: 50px;
+            font-size: 12px;
+            text-align: right;
+            color: #666;
+        }
+
+        .color-preview-area {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .color-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            background: #808080;
+            flex-shrink: 0;
+        }
+
+        .color-info {
+            flex: 1;
+        }
+
+        .hex-value {
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .btn-select {
+            background: #18a0fb;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .btn-select:hover {
+            background: #0d7ce8;
+        }
+
+        .btn-select:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .harmony-suggestions {
+            border-top: 1px solid #eee;
+            padding-top: 16px;
+            margin-top: 16px;
+        }
+
+        .harmony-suggestions label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        /* Color Selection Styles */
+        .section {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid #e5e5e5;
+        }
+
+        .section h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #333;
+        }
+
+        .selection-progress {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 0 8px;
+        }
+
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            position: relative;
+        }
+
+        .progress-step:not(:last-child)::after {
+            content: '';
+            position: absolute;
+            top: 12px;
+            right: -50%;
+            width: 100%;
+            height: 2px;
+            background: #e5e5e5;
+            z-index: 1;
+        }
+
+        .progress-step.active:not(:last-child)::after {
+            background: #007AFF;
+        }
+
+        .step-number {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #e5e5e5;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .progress-step.active .step-number {
+            background: #007AFF;
+            color: white;
+        }
+
+        .progress-step.completed .step-number {
+            background: #34C759;
+            color: white;
+        }
+
+        .step-label {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+        }
+
+        .progress-step.active .step-label {
+            color: #007AFF;
+            font-weight: 600;
+        }
+
+        .extracted-colors {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .extracted-color {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            border: 2px solid #e5e5e5;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .extracted-color:hover {
+            border-color: #007AFF;
+            transform: scale(1.05);
+        }
+
+        .extracted-color.selected {
+            border-color: #007AFF;
+            border-width: 3px;
+            box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
+        }
+
+        .extracted-color.primary {
+            border-color: #FF3B30;
+            border-width: 3px;
+            box-shadow: 0 0 0 2px rgba(255, 59, 48, 0.2);
+        }
+
+        .extracted-color.secondary {
+            border-color: #FF9500;
+            border-width: 3px;
+            box-shadow: 0 0 0 2px rgba(255, 149, 0, 0.2);
+        }
+
+        .extracted-color.tertiary {
+            border-color: #34C759;
+            border-width: 3px;
+            box-shadow: 0 0 0 2px rgba(52, 199, 89, 0.2);
+        }
+
+        .color-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            font-size: 10px;
+            padding: 4px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .selection-status {
+            text-align: center;
+            padding: 12px;
+            background: #f5f5f5;
+            border-radius: 6px;
+            margin-bottom: 16px;
+        }
+
+        .selection-status p {
+            font-size: 14px;
+            color: #666;
+            margin: 0;
+        }
+
+        .selection-status .selected-colors {
+            margin-top: 8px;
+            font-size: 12px;
+        }
+
+        .selected-colors span {
+            display: inline-block;
+            margin: 0 4px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: white;
+            font-weight: 600;
+        }
+
+        .selected-colors .primary { background: #FF3B30; }
+        .selected-colors .secondary { background: #FF9500; }
+        .selected-colors .tertiary { background: #34C759; }
+
+        .harmony-colors {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .harmony-color {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .harmony-color:hover {
+            transform: scale(1.05);
+            border-color: #666;
+        }
+
+        .harmony-color::after {
+            content: attr(data-type);
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: #666;
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>🎨 Palette Generator</h1>
-            <p>Generate systematic color palettes from your moodboards</p>
+            <p>Extract colors from your image and build a complete design system</p>
         </div>
 
         <div class="instructions">
             <h3>How to use:</h3>
             <ol>
-                <li>Select either:
-                    <ul style="margin-top: 8px; margin-left: 20px;">
-                        <li><strong>A frame</strong> containing multiple moodboard images, or</li>
-                        <li><strong>A single image</strong> rectangle for quick palette generation</li>
-                    </ul>
-                </li>
-                <li>Configure your palette settings below</li>
-                <li>Click "Generate Palette" to create your color system</li>
+                <li>Select a rectangle with an image fill in Figma</li>
+                <li>Click "Extract Colors from Image" to analyze the image</li>
+                <li>Select your primary, secondary, and tertiary colors from the extracted colors</li>
+                <li>Generate your complete design system</li>
             </ol>
+        </div>
+
+        <!-- Color Selection Section -->
+        <div id="color-selection-section" class="section" style="display: none;">
+            <h3>Select Your Colors</h3>
+            <div id="selection-progress" class="selection-progress">
+                <div class="progress-step active" data-step="1">
+                    <span class="step-number">1</span>
+                    <span class="step-label">Primary</span>
+                </div>
+                <div class="progress-step" data-step="2">
+                    <span class="step-number">2</span>
+                    <span class="step-label">Secondary</span>
+                </div>
+                <div class="progress-step" data-step="3">
+                    <span class="step-number">3</span>
+                    <span class="step-label">Tertiary</span>
+                </div>
+            </div>
+            
+            <div id="extracted-colors" class="extracted-colors">
+                <!-- Colors will be populated here -->
+            </div>
+            
+            <div id="selection-status" class="selection-status">
+                <p>Click on a color to select it as your primary color</p>
+            </div>
+        </div>
+
+        <div class="color-picker-section" style="display: none;">
+            <div class="setting-group">
+                <label>Select Your Brand Colors</label>
+                <p style="font-size: 12px; color: #666; margin-bottom: 16px;">Pick colors in order: Primary (1) → Secondary (2) → Tertiary (3)</p>
+                
+                <!-- Current Selection Status -->
+                <div class="selection-progress" id="selectionProgress">
+                    <div class="selection-step active" id="step1">
+                        <div class="step-number">1</div>
+                        <div class="step-info">
+                            <span class="step-title">Primary</span>
+                            <div class="step-color" id="primaryColor"></div>
+                        </div>
+                    </div>
+                    <div class="selection-step" id="step2">
+                        <div class="step-number">2</div>
+                        <div class="step-info">
+                            <span class="step-title">Secondary</span>
+                            <div class="step-color" id="secondaryColor"></div>
+                        </div>
+                    </div>
+                    <div class="selection-step" id="step3">
+                        <div class="step-number">3</div>
+                        <div class="step-info">
+                            <span class="step-title">Tertiary</span>
+                            <div class="step-color" id="tertiaryColor"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Color Picker Interface -->
+                <div class="color-picker-interface">
+                    <!-- Quick Preset Colors -->
+                    <div class="preset-colors">
+                        <label>Quick Presets:</label>
+                        <div class="preset-grid" id="presetGrid">
+                            <!-- Vibrant colors similar to anime image -->
+                        </div>
+                    </div>
+
+                    <!-- Advanced HSL Picker -->
+                    <div class="advanced-picker">
+                        <label>Custom Color Picker:</label>
+                        <div class="hsl-controls">
+                            <div class="control-group">
+                                <label for="hueSlider">Hue</label>
+                                <input type="range" id="hueSlider" min="0" max="360" value="0" class="slider hue-slider">
+                                <span id="hueValue">0°</span>
+                            </div>
+                            <div class="control-group">
+                                <label for="satSlider">Saturation</label>
+                                <input type="range" id="satSlider" min="0" max="100" value="50" class="slider">
+                                <span id="satValue">50%</span>
+                            </div>
+                            <div class="control-group">
+                                <label for="lightSlider">Lightness</label>
+                                <input type="range" id="lightSlider" min="0" max="100" value="50" class="slider">
+                                <span id="lightValue">50%</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Color Preview and Selection -->
+                        <div class="color-preview-area">
+                            <div class="color-preview" id="colorPreview"></div>
+                            <div class="color-info">
+                                <div class="hex-value" id="hexValue">#808080</div>
+                                <button class="btn btn-select" id="selectColorBtn">Select This Color</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Harmony Suggestions -->
+                    <div class="harmony-suggestions" id="harmonySuggestions" style="display: none;">
+                        <label>Suggested Colors Based on Your Primary:</label>
+                        <div class="harmony-colors" id="harmonyColors">
+                            <!-- Auto-generated harmony suggestions -->
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="settings">
             <div class="setting-group">
-                <label for="scaleSteps">Color Scale Steps:</label>
-                <select id="scaleSteps">
-                    <option value="5">5 steps (quick)</option>
-                    <option value="9" selected>9 steps (000-900)</option>
-                    <option value="13">13 steps (detailed)</option>
-                </select>
+                <label>Color Scale Steps:</label>
+                <div class="radio-group">
+                    <div class="radio-item">
+                        <input type="radio" id="scale5" name="scaleSteps" value="5">
+                        <label for="scale5">5 steps (quick)</label>
+                    </div>
+                    <div class="radio-item">
+                        <input type="radio" id="scale9" name="scaleSteps" value="9" checked>
+                        <label for="scale9">9 steps (000-900)</label>
+                    </div>
+                    <div class="radio-item">
+                        <input type="radio" id="scale13" name="scaleSteps" value="13">
+                        <label for="scale13">13 steps (detailed)</label>
+                    </div>
+                </div>
             </div>
 
             <div class="setting-group">
@@ -357,7 +1158,7 @@
         </div>
 
         <div class="actions">
-            <button class="btn btn-primary" id="generateBtn">Generate Palette</button>
+            <button class="btn btn-primary" id="generateBtn">Extract Colors from Image</button>
             <button class="btn btn-secondary" id="cancelBtn">Cancel</button>
         </div>
 
@@ -380,25 +1181,385 @@
             accessibilityToggle.classList.toggle('active', accessibilityCheck.checked);
         });
 
-        // Button event handlers
+        let primaryColors = [];
+        let selectedPrimary = null;
+
+        // Primary color selection handlers
+        function showPrimarySelection(colors) {
+            const primarySelection = document.getElementById('primarySelection');
+            const primaryOptions = document.getElementById('primaryOptions');
+            
+            primaryColors = colors;
+            primaryOptions.innerHTML = '';
+            
+            // Add extracted color options
+            colors.forEach((color, index) => {
+                const option = document.createElement('div');
+                option.className = 'primary-option';
+                option.dataset.index = index;
+                
+                const rgbString = `rgb(${Math.round(color.r * 255)}, ${Math.round(color.g * 255)}, ${Math.round(color.b * 255)})`;
+                
+                option.innerHTML = `
+                    <div class="primary-color-swatch" style="background-color: ${rgbString}"></div>
+                    <div class="primary-option-label">Option ${index + 1}</div>
+                `;
+                
+                option.addEventListener('click', () => selectPrimary(index, color));
+                primaryOptions.appendChild(option);
+            });
+            
+            // Add custom color option
+            const customOption = document.createElement('div');
+            customOption.className = 'primary-option custom';
+            customOption.innerHTML = `
+                <div class="primary-color-swatch"></div>
+                <div class="primary-option-label">Custom</div>
+            `;
+            customOption.addEventListener('click', () => openColorPicker());
+            primaryOptions.appendChild(customOption);
+            
+            primarySelection.style.display = 'block';
+            document.getElementById('generateBtn').textContent = 'Generate Palette';
+            document.getElementById('generateBtn').disabled = false;
+            showStatus('Choose your primary color from the options above.', 'info');
+        }
+        
+        function selectPrimary(index, color) {
+            // Remove previous selection
+            document.querySelectorAll('.primary-option').forEach(opt => opt.classList.remove('selected'));
+            
+            // Add selection to clicked option
+            document.querySelector(`[data-index="${index}"]`).classList.add('selected');
+            
+            selectedPrimary = color;
+            showStatus(`Primary color selected! Click "Generate Palette" to continue.`, 'success');
+        }
+        
+        function openColorPicker() {
+            // Create a color input element for picking custom color
+            const colorInput = document.createElement('input');
+            colorInput.type = 'color';
+            colorInput.style.opacity = '0';
+            colorInput.style.position = 'absolute';
+            colorInput.style.pointerEvents = 'none';
+            document.body.appendChild(colorInput);
+            
+            colorInput.addEventListener('change', (e) => {
+                const hex = e.target.value;
+                const color = hexToRgb(hex);
+                
+                // Remove previous selection
+                document.querySelectorAll('.primary-option').forEach(opt => opt.classList.remove('selected'));
+                
+                // Mark custom as selected and update its display
+                const customOption = document.querySelector('.primary-option.custom');
+                customOption.classList.add('selected');
+                const swatch = customOption.querySelector('.primary-color-swatch');
+                swatch.style.background = hex;
+                swatch.style.animation = 'none';
+                
+                selectedPrimary = color;
+                showStatus(`Custom primary color selected! Click "Generate Palette" to continue.`, 'success');
+                
+                document.body.removeChild(colorInput);
+            });
+            
+            colorInput.click();
+        }
+        
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16) / 255,
+                g: parseInt(result[2], 16) / 255,
+                b: parseInt(result[3], 16) / 255
+            } : null;
+        }
+
+        function rgbToHex(r, g, b) {
+            const toHex = (n) => {
+                const hex = Math.round(n * 255).toString(16);
+                return hex.length === 1 ? '0' + hex : hex;
+            };
+            return '#' + toHex(r) + toHex(g) + toHex(b);
+        }
+
+        function hslToRgb(h, s, l) {
+            h = h / 360;
+            s = s / 100;
+            l = l / 100;
+            
+            const hue2rgb = (p, q, t) => {
+                if (t < 0) t += 1;
+                if (t > 1) t -= 1;
+                if (t < 1/6) return p + (q - p) * 6 * t;
+                if (t < 1/2) return q;
+                if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+                return p;
+            };
+            
+            if (s === 0) {
+                return { r: l, g: l, b: l };
+            }
+            
+            const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+            const p = 2 * l - q;
+            
+            return {
+                r: hue2rgb(p, q, h + 1/3),
+                g: hue2rgb(p, q, h),
+                b: hue2rgb(p, q, h - 1/3)
+            };
+        }
+
+        function rgbToHslPercent(r, g, b) {
+            const max = Math.max(r, g, b);
+            const min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+
+            if (max === min) {
+                h = s = 0; // achromatic
+            } else {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h /= 6;
+            }
+
+            return { h: h * 360, s: s * 100, l: l * 100 };
+        }
+
+        // Color picker workflow state
+        let selectedColors = { primary: null, secondary: null, tertiary: null };
+        let currentStep = 'primary'; // primary, secondary, tertiary
+        let currentHSL = { h: 0, s: 50, l: 50 };
+
+        // Initialize the interface
+        document.addEventListener('DOMContentLoaded', () => {
+            initializePresetColors();
+            initializeColorPicker();
+            updateColorPreview();
+        });
+
+        // Initialize preset colors (vibrant colors like your anime image)
+        function initializePresetColors() {
+            const presets = [
+                '#FF8FA3', '#FFB6C1', '#FF69B4', '#FF1493', // Pinks
+                '#FFB347', '#FFA500', '#FF8C00', '#FF6347', // Oranges
+                '#87CEEB', '#4169E1', '#0000FF', '#1E90FF', // Blues
+                '#98FB98', '#00FF7F', '#32CD32', '#228B22', // Greens
+                '#DDA0DD', '#9370DB', '#8A2BE2', '#4B0082', // Purples
+                '#F0E68C', '#FFD700', '#FFA500', '#FF4500', // Yellows/Reds
+                '#F5DEB3', '#DEB887', '#CD853F', '#8B4513', // Browns/Tans
+                '#696969', '#2F4F4F', '#000000', '#FFFFFF'  // Grays
+            ];
+
+            const presetGrid = document.getElementById('presetGrid');
+            presets.forEach(color => {
+                const colorDiv = document.createElement('div');
+                colorDiv.className = 'preset-color';
+                colorDiv.style.backgroundColor = color;
+                colorDiv.title = color;
+                colorDiv.addEventListener('click', () => selectPresetColor(color));
+                presetGrid.appendChild(colorDiv);
+            });
+        }
+
+        // Initialize HSL sliders
+        function initializeColorPicker() {
+            const hueSlider = document.getElementById('hueSlider');
+            const satSlider = document.getElementById('satSlider');
+            const lightSlider = document.getElementById('lightSlider');
+
+            hueSlider.addEventListener('input', (e) => {
+                currentHSL.h = parseInt(e.target.value);
+                document.getElementById('hueValue').textContent = e.target.value + '°';
+                updateColorPreview();
+            });
+
+            satSlider.addEventListener('input', (e) => {
+                currentHSL.s = parseInt(e.target.value);
+                document.getElementById('satValue').textContent = e.target.value + '%';
+                updateColorPreview();
+            });
+
+            lightSlider.addEventListener('input', (e) => {
+                currentHSL.l = parseInt(e.target.value);
+                document.getElementById('lightValue').textContent = e.target.value + '%';
+                updateColorPreview();
+            });
+
+            // Select color button
+            document.getElementById('selectColorBtn').addEventListener('click', () => {
+                const rgb = hslToRgb(currentHSL.h, currentHSL.s, currentHSL.l);
+                selectColor(rgb);
+            });
+        }
+
+        // Update color preview
+        function updateColorPreview() {
+            const colorPreview = document.getElementById('colorPreview');
+            const hexValue = document.getElementById('hexValue');
+            
+            const hslColor = `hsl(${currentHSL.h}, ${currentHSL.s}%, ${currentHSL.l}%)`;
+            colorPreview.style.backgroundColor = hslColor;
+            
+            // Convert to hex for display
+            const rgb = hslToRgb(currentHSL.h, currentHSL.s, currentHSL.l);
+            const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+            hexValue.textContent = hex;
+        }
+
+        // Select preset color
+        function selectPresetColor(hexColor) {
+            const rgb = hexToRgb(hexColor);
+            if (rgb) {
+                selectColor(rgb);
+            }
+        }
+
+        // Main color selection function
+        function selectColor(rgb) {
+            selectedColors[currentStep] = rgb;
+            
+            // Update visual indicators
+            updateStepVisual(currentStep, rgb);
+            
+            // Move to next step
+            if (currentStep === 'primary') {
+                currentStep = 'secondary';
+                showHarmonySuggestions(rgb);
+                showStatus('Great! Now select your Secondary color.', 'info');
+            } else if (currentStep === 'secondary') {
+                currentStep = 'tertiary';
+                showStatus('Perfect! Finally, select your Tertiary color.', 'info');
+            } else if (currentStep === 'tertiary') {
+                currentStep = 'complete';
+                enableGeneration();
+                showStatus('All colors selected! Ready to generate your design system.', 'success');
+            }
+            
+            updateActiveStep();
+        }
+
+        // Update step visual with selected color
+        function updateStepVisual(step, rgb) {
+            const stepElement = document.getElementById(step + 'Color');
+            const hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+            stepElement.style.backgroundColor = hex;
+            stepElement.style.border = '1px solid #ccc';
+            
+            // Mark step as completed
+            const stepContainer = document.getElementById('step' + (step === 'primary' ? '1' : step === 'secondary' ? '2' : '3'));
+            stepContainer.classList.add('completed');
+            stepContainer.classList.remove('active');
+        }
+
+        // Update active step indicator
+        function updateActiveStep() {
+            // Remove active from all steps
+            document.querySelectorAll('.selection-step').forEach(step => step.classList.remove('active'));
+            
+            // Add active to current step (if not complete)
+            if (currentStep !== 'complete') {
+                const stepNumber = currentStep === 'primary' ? '1' : currentStep === 'secondary' ? '2' : '3';
+                document.getElementById('step' + stepNumber).classList.add('active');
+            }
+        }
+
+        // Show harmony suggestions based on primary color
+        function showHarmonySuggestions(primaryRgb) {
+            const suggestions = document.getElementById('harmonySuggestions');
+            const harmonyColors = document.getElementById('harmonyColors');
+            
+            // Generate harmony colors
+            const harmonies = generateColorHarmonies(primaryRgb);
+            
+            harmonyColors.innerHTML = '';
+            Object.entries(harmonies).forEach(([type, colors]) => {
+                colors.forEach((color, index) => {
+                    const colorDiv = document.createElement('div');
+                    colorDiv.className = 'harmony-color';
+                    colorDiv.setAttribute('data-type', type);
+                    const hex = rgbToHex(color.r, color.g, color.b);
+                    colorDiv.style.backgroundColor = hex;
+                    colorDiv.title = `${type} ${index + 1}: ${hex}`;
+                    colorDiv.addEventListener('click', () => selectColor(color));
+                    harmonyColors.appendChild(colorDiv);
+                });
+            });
+            
+            suggestions.style.display = 'block';
+        }
+
+        // Generate color harmonies for suggestions
+        function generateColorHarmonies(rgb) {
+            const hsl = rgbToHslPercent(rgb.r, rgb.g, rgb.b);
+            
+            return {
+                'Complement': [hslToRgb((hsl.h + 180) % 360, hsl.s, hsl.l)],
+                'Analogous': [
+                    hslToRgb((hsl.h + 30) % 360, hsl.s, hsl.l),
+                    hslToRgb((hsl.h - 30 + 360) % 360, hsl.s, hsl.l)
+                ],
+                'Triadic': [
+                    hslToRgb((hsl.h + 120) % 360, hsl.s, hsl.l),
+                    hslToRgb((hsl.h + 240) % 360, hsl.s, hsl.l)
+                ]
+            };
+        }
+
+        // Enable palette generation
+        function enableGeneration() {
+            const generateBtn = document.getElementById('generateBtn');
+            generateBtn.disabled = false;
+            generateBtn.textContent = 'Generate Design System';
+        }
+
+                // Generate button handler
         document.getElementById('generateBtn').addEventListener('click', () => {
+            const btnText = document.getElementById('generateBtn').textContent;
+            
+            if (btnText === 'Extract Colors from Image') {
+                // Extract colors from selected image
+                showProgress();
+                showStatus('Extracting colors from your image...', 'info');
+
+                parent.postMessage({
+                    pluginMessage: {
+                        type: 'extract-image-colors'
+                    }
+                }, '*');
+                
+            } else if (btnText === 'Generate Design System') {
+                // Generate complete palette from selected colors
+                if (!selectedColors.primary || !selectedColors.secondary || !selectedColors.tertiary) {
+                    showStatus('Please select all three colors first.', 'error');
+                    return;
+                }
+
             const settings = {
-                scaleSteps: parseInt(document.getElementById('scaleSteps').value),
+                    scaleSteps: parseInt(document.querySelector('input[name="scaleSteps"]:checked').value),
                 accessibility: accessibilityCheck.checked,
-                harmonyTypes: Array.from(document.querySelectorAll('.checkbox-item input:checked')).map(input => input.value)
+                    harmonyTypes: Array.from(document.querySelectorAll('.checkbox-item input:checked')).map(input => input.value)
             };
 
-            // Send message to plugin
             parent.postMessage({ 
                 pluginMessage: { 
                     type: 'generate-palette',
+                        selectedColors: selectedColors,
                     settings: settings
                 }
             }, '*');
 
-            // Show progress
             showProgress();
-            showStatus('Generating palette...', 'info');
+                showStatus('Creating your complete design system...', 'info');
+            }
         });
 
         document.getElementById('cancelBtn').addEventListener('click', () => {
@@ -434,18 +1595,756 @@
             }, 200);
         }
 
+        function hideProgress() {
+            const progress = document.getElementById('progress');
+            progress.style.display = 'none';
+            // Reset progress bar
+            const progressFill = document.getElementById('progressFill');
+            progressFill.style.width = '0%';
+        }
+
         // Listen for messages from the plugin
         window.addEventListener('message', (event) => {
             const message = event.data.pluginMessage;
             
-            if (message && message.type === 'palette-generated') {
-                showStatus('Palette generated successfully!', 'success');
-                document.getElementById('progress').style.display = 'none';
+            if (message && message.type === 'image-bytes-received') {
+                handleImageBytesReceived(message.imageBytes, message.imageHash);
+            } else if (message && message.type === 'palette-generated') {
+                hideProgress();
+                showStatus('Complete design system generated successfully!', 'success');
             } else if (message && message.type === 'error') {
+                hideProgress();
                 showStatus(message.message || 'An error occurred', 'error');
-                document.getElementById('progress').style.display = 'none';
             }
         });
+
+        // Handle received image bytes for pixel analysis
+        function handleImageBytesReceived(imageBytes, imageHash) {
+            console.log('Received image bytes:', imageBytes.length, 'bytes');
+            console.log('Image hash:', imageHash);
+            
+            // Convert array back to Uint8Array
+            const uint8Array = new Uint8Array(imageBytes);
+            
+            // Create blob from bytes
+            const blob = new Blob([uint8Array], { type: 'image/png' });
+            const url = URL.createObjectURL(blob);
+            
+            // Create image element to load the blob
+            const img = new Image();
+            img.onload = () => {
+                console.log('Image loaded successfully:', img.width, 'x', img.height);
+                
+                // Process image with canvas for pixel analysis
+                const extractedColors = analyzeImagePixels(img);
+                console.log('Extracted colors:', extractedColors);
+                
+                // Apply median cut algorithm to get more diverse colors
+                const dominantColors = medianCutAlgorithm(extractedColors, 8); // Get 8 colors for better diversity
+                console.log('Dominant colors after median cut:', dominantColors);
+                
+                // Analyze and rank colors for primary selection
+                const primaryCandidates = analyzePrimaryCandidates(dominantColors);
+                console.log('Primary color candidates:', primaryCandidates);
+                
+                // Generate hybrid secondary/tertiary colors
+                const hybridPalette = generateHybridPalette(primaryCandidates, dominantColors);
+                console.log('Hybrid palette generated:', hybridPalette);
+                
+                // Show extracted colors in UI for user selection
+                displayExtractedColors(primaryCandidates, dominantColors);
+                
+                URL.revokeObjectURL(url);
+            };
+            img.onerror = () => {
+                console.error('Failed to load image from bytes');
+                showStatus('Failed to process image', 'error');
+                URL.revokeObjectURL(url);
+            };
+            img.src = url;
+        }
+
+        // Analyze image pixels using canvas
+        function analyzeImagePixels(img) {
+            console.log('Starting pixel analysis...');
+            
+            // Create canvas to analyze the image
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size to image size
+            canvas.width = img.width;
+            canvas.height = img.height;
+            
+            // Draw image to canvas
+            ctx.drawImage(img, 0, 0);
+            
+            // Get image data (pixel array)
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const pixels = imageData.data;
+            
+            console.log('Image dimensions:', canvas.width, 'x', canvas.height);
+            console.log('Total pixels:', pixels.length / 4); // RGBA = 4 values per pixel
+            
+            // Extract RGB values from pixels
+            const colors = [];
+            const totalPixels = pixels.length / 4;
+            
+            // Dynamic sampling based on image size to prevent stack overflow
+            let step = 1;
+            if (totalPixels > 1000000) { // > 1M pixels
+                step = 50; // Sample every 50th pixel
+            } else if (totalPixels > 500000) { // > 500K pixels
+                step = 25; // Sample every 25th pixel
+            } else if (totalPixels > 100000) { // > 100K pixels
+                step = 10; // Sample every 10th pixel
+            } else {
+                step = 5; // Sample every 5th pixel for smaller images
+            }
+            
+            console.log('Using sampling step:', step, 'for', totalPixels, 'pixels');
+            
+            for (let i = 0; i < pixels.length; i += 4 * step) {
+                const r = pixels[i] / 255;     // Red (0-1)
+                const g = pixels[i + 1] / 255; // Green (0-1)
+                const b = pixels[i + 2] / 255; // Blue (0-1)
+                const a = pixels[i + 3] / 255; // Alpha (0-1)
+                
+                // Skip transparent pixels
+                if (a > 0.1) {
+                    colors.push({ r, g, b });
+                }
+            }
+            
+            console.log('Extracted', colors.length, 'colors from image');
+            return colors;
+        }
+
+        // Enhanced Median Cut Algorithm for better color diversity
+        function medianCutAlgorithm(colors, targetCount) {
+            console.log('Starting enhanced median cut algorithm...');
+            console.log('Input colors:', colors.length, 'Target count:', targetCount);
+            
+            if (colors.length <= targetCount) {
+                return colors.slice(0, targetCount);
+            }
+            
+            // Limit input size to prevent stack overflow
+            const maxColors = 10000; // Maximum colors to process
+            let colorsToProcess = colors;
+            if (colors.length > maxColors) {
+                console.log('Limiting colors to', maxColors, 'to prevent stack overflow');
+                // Randomly sample colors to reduce size
+                colorsToProcess = [];
+                const step = Math.floor(colors.length / maxColors);
+                for (let i = 0; i < colors.length; i += step) {
+                    colorsToProcess.push(colors[i]);
+                    if (colorsToProcess.length >= maxColors) break;
+                }
+            }
+            
+            // Pre-filter colors to remove very similar ones for better diversity
+            const diverseColors = filterSimilarColors(colorsToProcess, 0.15); // 15% similarity threshold
+            console.log('Filtered to', diverseColors.length, 'diverse colors');
+            
+            // Start with all colors in one bucket
+            let buckets = [diverseColors];
+            
+            // Split buckets until we have the target count
+            while (buckets.length < targetCount) {
+                // Find the bucket with the largest color range
+                let largestBucketIndex = 0;
+                let largestRange = getColorRange(buckets[0]);
+                
+                for (let i = 1; i < buckets.length; i++) {
+                    const range = getColorRange(buckets[i]);
+                    if (range > largestRange) {
+                        largestRange = range;
+                        largestBucketIndex = i;
+                    }
+                }
+                
+                // Split the largest bucket
+                const bucketToSplit = buckets[largestBucketIndex];
+                const [bucket1, bucket2] = splitBucket(bucketToSplit);
+                
+                // Replace the original bucket with the two split buckets
+                buckets.splice(largestBucketIndex, 1, bucket1, bucket2);
+                
+                console.log('Split bucket, now have', buckets.length, 'buckets');
+            }
+            
+            // Get representative color from each bucket (average)
+            const representativeColors = buckets.map(bucket => getAverageColor(bucket));
+            
+            console.log('Median cut complete. Generated', representativeColors.length, 'representative colors');
+            return representativeColors;
+        }
+
+        // Calculate the color range of a bucket (largest component range)
+        function getColorRange(colors) {
+            if (colors.length === 0) return 0;
+            
+            const rValues = colors.map(c => c.r);
+            const gValues = colors.map(c => c.g);
+            const bValues = colors.map(c => c.b);
+            
+            const rRange = Math.max(...rValues) - Math.min(...rValues);
+            const gRange = Math.max(...gValues) - Math.min(...gValues);
+            const bRange = Math.max(...bValues) - Math.min(...bValues);
+            
+            return Math.max(rRange, gRange, bRange);
+        }
+
+        // Split a color bucket at its median along the largest dimension
+        function splitBucket(colors) {
+            if (colors.length <= 1) {
+                return [colors, []];
+            }
+            
+            // Find the dimension with the largest range
+            const rValues = colors.map(c => c.r);
+            const gValues = colors.map(c => c.g);
+            const bValues = colors.map(c => c.b);
+            
+            const rRange = Math.max(...rValues) - Math.min(...rValues);
+            const gRange = Math.max(...gValues) - Math.min(...gValues);
+            const bRange = Math.max(...bValues) - Math.min(...bValues);
+            
+            let sortedColors;
+            
+            if (rRange >= gRange && rRange >= bRange) {
+                // Sort by red
+                sortedColors = colors.sort((a, b) => a.r - b.r);
+            } else if (gRange >= bRange) {
+                // Sort by green
+                sortedColors = colors.sort((a, b) => a.g - b.g);
+            } else {
+                // Sort by blue
+                sortedColors = colors.sort((a, b) => a.b - b.b);
+            }
+            
+            // Split at median
+            const median = Math.floor(sortedColors.length / 2);
+            return [sortedColors.slice(0, median), sortedColors.slice(median)];
+        }
+
+        // Get the average color of a bucket
+        function getAverageColor(colors) {
+            if (colors.length === 0) {
+                return { r: 0, g: 0, b: 0 };
+            }
+            
+            const sum = colors.reduce(
+                (acc, color) => ({
+                    r: acc.r + color.r,
+                    g: acc.g + color.g,
+                    b: acc.b + color.b
+                }),
+                { r: 0, g: 0, b: 0 }
+            );
+            
+            return {
+                r: sum.r / colors.length,
+                g: sum.g / colors.length,
+                b: sum.b / colors.length
+            };
+        }
+
+        // Analyze and rank colors for primary selection with diversity consideration
+        function analyzePrimaryCandidates(colors) {
+            console.log('Analyzing primary color candidates with diversity...');
+            
+            // Score each color based on multiple criteria
+            const scoredColors = colors.map(color => {
+                const score = calculatePrimaryScore(color);
+                return {
+                    color: color,
+                    score: score,
+                    hex: rgbToHex(color.r, color.g, color.b)
+                };
+            });
+            
+            // Sort by score (highest first)
+            scoredColors.sort((a, b) => b.score - a.score);
+            
+            // Ensure diversity by penalizing colors that are too similar to higher-scoring ones
+            const diverseCandidates = [];
+            for (let i = 0; i < scoredColors.length; i++) {
+                const candidate = scoredColors[i];
+                let isDiverse = true;
+                
+                // Check if this color is too similar to any already selected diverse candidate
+                for (let j = 0; j < diverseCandidates.length; j++) {
+                    const existingCandidate = diverseCandidates[j];
+                    const distance = calculateColorDistance(candidate.color, existingCandidate.color);
+                    
+                    // If too similar (distance < 0.2), skip this candidate
+                    if (distance < 0.2) {
+                        isDiverse = false;
+                        break;
+                    }
+                }
+                
+                if (isDiverse) {
+                    diverseCandidates.push(candidate);
+                }
+            }
+            
+            console.log('Diverse color candidates:', diverseCandidates.map(c => `${c.hex}: ${c.score.toFixed(2)}`));
+            
+            return diverseCandidates;
+        }
+
+        // Calculate primary color suitability score
+        function calculatePrimaryScore(color) {
+            const hsl = rgbToHslPercent(color.r, color.g, color.b);
+            
+            // Scoring criteria (0-1 scale)
+            let score = 0;
+            
+            // 1. Saturation score (higher saturation = better primary)
+            const saturationScore = Math.min(hsl.s / 100, 1);
+            score += saturationScore * 0.3;
+            
+            // 2. Lightness score (avoid too light/dark)
+            const lightnessScore = 1 - Math.abs(hsl.l - 50) / 50; // Peak at 50% lightness
+            score += lightnessScore * 0.25;
+            
+            // 3. Vibrancy score (distance from gray)
+            const vibrancyScore = Math.sqrt(
+                Math.pow(color.r - 0.5, 2) + 
+                Math.pow(color.g - 0.5, 2) + 
+                Math.pow(color.b - 0.5, 2)
+            ) * 2; // Scale to 0-1
+            score += vibrancyScore * 0.2;
+            
+            // 4. Hue preference (avoid pure grays)
+            const hueScore = hsl.s > 10 ? 1 : 0; // Bonus for non-gray colors
+            score += hueScore * 0.15;
+            
+            // 5. Contrast potential (how well it contrasts with white/black)
+            const whiteContrast = Math.abs(color.r - 1) + Math.abs(color.g - 1) + Math.abs(color.b - 1);
+            const blackContrast = color.r + color.g + color.b;
+            const contrastScore = Math.max(whiteContrast, blackContrast) / 3;
+            score += contrastScore * 0.1;
+            
+            return Math.min(score, 1); // Cap at 1.0
+        }
+
+        // Convert RGB to HSL with percentage values
+        function rgbToHslPercent(r, g, b) {
+            const max = Math.max(r, g, b);
+            const min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+
+            if (max === min) {
+                h = s = 0; // achromatic
+            } else {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h /= 6;
+            }
+
+            return { 
+                h: h * 360, 
+                s: s * 100, 
+                l: l * 100 
+            };
+        }
+
+        // Generate hybrid palette combining color theory with image colors
+        function generateHybridPalette(primaryCandidates, imageColors) {
+            console.log('Generating hybrid palette...');
+            
+            // Use the best primary candidate
+            const primary = primaryCandidates[0].color;
+            const primaryHsl = rgbToHslPercent(primary.r, primary.g, primary.b);
+            
+            console.log('Primary color:', primaryHsl);
+            
+            // Generate color theory-based secondary and tertiary
+            const theoryColors = generateColorTheoryColors(primaryHsl);
+            console.log('Theory-based colors:', theoryColors);
+            
+            // Find best image colors for secondary and tertiary
+            const imageSecondary = findBestImageSecondary(primary, imageColors);
+            const imageTertiary = findBestImageTertiary(primary, imageColors, imageSecondary);
+            
+            console.log('Image-based secondary:', imageSecondary);
+            console.log('Image-based tertiary:', imageTertiary);
+            
+            // Blend theory and image colors
+            const secondary = blendColors(theoryColors.secondary, imageSecondary, 0.6); // 60% theory, 40% image
+            const tertiary = blendColors(theoryColors.tertiary, imageTertiary, 0.5); // 50% theory, 50% image
+            
+            return {
+                primary: primary,
+                secondary: secondary,
+                tertiary: tertiary,
+                theoryColors: theoryColors,
+                imageColors: {
+                    secondary: imageSecondary,
+                    tertiary: imageTertiary
+                }
+            };
+        }
+
+        // Generate colors based on color theory
+        function generateColorTheoryColors(primaryHsl) {
+            // Generate complementary color
+            const complementaryHue = (primaryHsl.h + 180) % 360;
+            const complementary = {
+                h: complementaryHue,
+                s: Math.min(primaryHsl.s * 0.8, 100), // Slightly less saturated
+                l: Math.max(primaryHsl.l * 0.7, 20)  // Slightly darker
+            };
+            
+            // Generate analogous color (30 degrees away)
+            const analogousHue = (primaryHsl.h + 30) % 360;
+            const analogous = {
+                h: analogousHue,
+                s: Math.min(primaryHsl.s * 0.9, 100),
+                l: Math.max(primaryHsl.l * 0.8, 15)
+            };
+            
+            // Generate triadic color (120 degrees away)
+            const triadicHue = (primaryHsl.h + 120) % 360;
+            const triadic = {
+                h: triadicHue,
+                s: Math.min(primaryHsl.s * 0.85, 100),
+                l: Math.max(primaryHsl.l * 0.75, 20)
+            };
+            
+            return {
+                secondary: hslToRgb(complementary.h, complementary.s, complementary.l),
+                tertiary: hslToRgb(analogous.h, analogous.s, analogous.l),
+                triadic: hslToRgb(triadic.h, triadic.s, triadic.l)
+            };
+        }
+
+        // Find best image color for secondary (complementary to primary)
+        function findBestImageSecondary(primary, imageColors) {
+            const primaryHsl = rgbToHslPercent(primary.r, primary.g, primary.b);
+            const targetHue = (primaryHsl.h + 180) % 360;
+            
+            let bestColor = imageColors[0];
+            let bestScore = -1;
+            
+            imageColors.forEach(color => {
+                const colorHsl = rgbToHslPercent(color.r, color.g, color.b);
+                
+                // Calculate hue distance from target (complementary)
+                const hueDistance = Math.min(
+                    Math.abs(colorHsl.h - targetHue),
+                    360 - Math.abs(colorHsl.h - targetHue)
+                );
+                
+                // Score based on hue proximity and saturation
+                const hueScore = 1 - (hueDistance / 180); // 0-1 scale
+                const saturationScore = colorHsl.s / 100;
+                const score = (hueScore * 0.6) + (saturationScore * 0.4);
+                
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestColor = color;
+                }
+            });
+            
+            return bestColor;
+        }
+
+        // Find best image color for tertiary (different from primary and secondary)
+        function findBestImageTertiary(primary, imageColors, secondary) {
+            const primaryHsl = rgbToHslPercent(primary.r, primary.g, primary.b);
+            const secondaryHsl = rgbToHslPercent(secondary.r, secondary.g, secondary.b);
+            
+            let bestColor = imageColors[0];
+            let bestScore = -1;
+            
+            imageColors.forEach(color => {
+                const colorHsl = rgbToHslPercent(color.r, color.g, color.b);
+                
+                // Calculate distances from primary and secondary
+                const primaryDistance = Math.min(
+                    Math.abs(colorHsl.h - primaryHsl.h),
+                    360 - Math.abs(colorHsl.h - primaryHsl.h)
+                );
+                const secondaryDistance = Math.min(
+                    Math.abs(colorHsl.h - secondaryHsl.h),
+                    360 - Math.abs(colorHsl.h - secondaryHsl.h)
+                );
+                
+                // Prefer colors that are different from both primary and secondary
+                const diversityScore = Math.min(primaryDistance, secondaryDistance) / 180;
+                const saturationScore = colorHsl.s / 100;
+                const score = (diversityScore * 0.7) + (saturationScore * 0.3);
+                
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestColor = color;
+                }
+            });
+            
+            return bestColor;
+        }
+
+        // Blend two colors with specified ratio
+        function blendColors(color1, color2, ratio) {
+            return {
+                r: color1.r * ratio + color2.r * (1 - ratio),
+                g: color1.g * ratio + color2.g * (1 - ratio),
+                b: color1.b * ratio + color2.b * (1 - ratio)
+            };
+        }
+
+        // Convert HSL to RGB
+        function hslToRgb(h, s, l) {
+            h = h / 360;
+            s = s / 100;
+            l = l / 100;
+            
+            const hue2rgb = (p, q, t) => {
+                if (t < 0) t += 1;
+                if (t > 1) t -= 1;
+                if (t < 1/6) return p + (q - p) * 6 * t;
+                if (t < 1/2) return q;
+                if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+                return p;
+            };
+            
+            let r, g, b;
+            
+            if (s === 0) {
+                r = g = b = l; // achromatic
+            } else {
+                const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                const p = 2 * l - q;
+                r = hue2rgb(p, q, h + 1/3);
+                g = hue2rgb(p, q, h);
+                b = hue2rgb(p, q, h - 1/3);
+            }
+            
+            return { r, g, b };
+        }
+
+        // Filter out similar colors to improve diversity
+        function filterSimilarColors(colors, similarityThreshold) {
+            const diverseColors = [];
+            const usedColors = new Set();
+            
+            for (let i = 0; i < colors.length; i++) {
+                const color = colors[i];
+                const colorKey = `${Math.round(color.r * 10)}_${Math.round(color.g * 10)}_${Math.round(color.b * 10)}`;
+                
+                // Skip if we've already used a very similar color
+                if (usedColors.has(colorKey)) {
+                    continue;
+                }
+                
+                // Check if this color is too similar to any existing diverse color
+                let isSimilar = false;
+                for (let j = 0; j < diverseColors.length; j++) {
+                    const existingColor = diverseColors[j];
+                    const distance = calculateColorDistance(color, existingColor);
+                    
+                    if (distance < similarityThreshold) {
+                        isSimilar = true;
+                        break;
+                    }
+                }
+                
+                if (!isSimilar) {
+                    diverseColors.push(color);
+                    usedColors.add(colorKey);
+                }
+            }
+            
+            return diverseColors;
+        }
+
+        // Calculate color distance (0-1 scale, lower = more similar)
+        function calculateColorDistance(color1, color2) {
+            const rDiff = color1.r - color2.r;
+            const gDiff = color1.g - color2.g;
+            const bDiff = color1.b - color2.b;
+            
+            // Euclidean distance in RGB space
+            return Math.sqrt(rDiff * rDiff + gDiff * gDiff + bDiff * bDiff);
+        }
+
+        // Display extracted colors in UI for user selection
+        function displayExtractedColors(primaryCandidates, dominantColors) {
+            console.log('Displaying extracted colors for selection...');
+            
+            // Show the color selection section
+            const colorSelectionSection = document.getElementById('color-selection-section');
+            colorSelectionSection.style.display = 'block';
+            
+            // Hide the color picker section
+            const colorPickerSection = document.querySelector('.color-picker-section');
+            colorPickerSection.style.display = 'none';
+            
+            // Populate extracted colors
+            const extractedColorsContainer = document.getElementById('extracted-colors');
+            extractedColorsContainer.innerHTML = '';
+            
+            primaryCandidates.forEach((candidate, index) => {
+                const colorDiv = document.createElement('div');
+                colorDiv.className = 'extracted-color';
+                colorDiv.style.backgroundColor = candidate.hex;
+                colorDiv.dataset.index = index;
+                colorDiv.dataset.color = JSON.stringify(candidate.color);
+                
+                // Add score label
+                const label = document.createElement('div');
+                label.className = 'color-label';
+                label.textContent = `${(candidate.score * 100).toFixed(0)}%`;
+                colorDiv.appendChild(label);
+                
+                // Add click handler
+                colorDiv.addEventListener('click', () => selectExtractedColor(candidate, index));
+                
+                extractedColorsContainer.appendChild(colorDiv);
+            });
+            
+            // Reset selection state
+            window.selectedColors = { primary: null, secondary: null, tertiary: null };
+            window.currentSelectionStep = 1;
+            updateSelectionStatus();
+        }
+
+        // Handle color selection
+        function selectExtractedColor(candidate, index) {
+            console.log(`Selected color ${index} for step ${window.currentSelectionStep}:`, candidate);
+            
+            const colorDiv = document.querySelector(`[data-index="${index}"]`);
+            const step = window.currentSelectionStep;
+            
+            // Remove previous selections for this step
+            document.querySelectorAll('.extracted-color').forEach(div => {
+                div.classList.remove('selected', 'primary', 'secondary', 'tertiary');
+            });
+            
+            // Mark this color as selected
+            colorDiv.classList.add('selected');
+            
+            if (step === 1) {
+                colorDiv.classList.add('primary');
+                window.selectedColors.primary = candidate.color;
+                window.currentSelectionStep = 2;
+            } else if (step === 2) {
+                colorDiv.classList.add('secondary');
+                window.selectedColors.secondary = candidate.color;
+                window.currentSelectionStep = 3;
+            } else if (step === 3) {
+                colorDiv.classList.add('tertiary');
+                window.selectedColors.tertiary = candidate.color;
+                window.currentSelectionStep = 4; // All selected
+            }
+            
+            updateSelectionStatus();
+            updateProgressSteps();
+            
+            // If all colors selected, enable generation
+            if (window.currentSelectionStep === 4) {
+                enablePaletteGeneration();
+            }
+        }
+
+        // Update selection status text
+        function updateSelectionStatus() {
+            const statusDiv = document.getElementById('selection-status');
+            const step = window.currentSelectionStep;
+            
+            if (step === 1) {
+                statusDiv.innerHTML = '<p>Click on a color to select it as your <strong>primary</strong> color</p>';
+            } else if (step === 2) {
+                statusDiv.innerHTML = '<p>Click on a color to select it as your <strong>secondary</strong> color</p>';
+            } else if (step === 3) {
+                statusDiv.innerHTML = '<p>Click on a color to select it as your <strong>tertiary</strong> color</p>';
+            } else if (step === 4) {
+                const selectedColorsHtml = Object.entries(window.selectedColors)
+                    .filter(([key, value]) => value !== null)
+                    .map(([key, value]) => `<span class="${key}">${key.charAt(0).toUpperCase() + key.slice(1)}</span>`)
+                    .join('');
+                
+                statusDiv.innerHTML = `
+                    <p>All colors selected! Ready to generate palette.</p>
+                    <div class="selected-colors">${selectedColorsHtml}</div>
+                `;
+            }
+        }
+
+        // Update progress steps visual state
+        function updateProgressSteps() {
+            const steps = document.querySelectorAll('.progress-step');
+            const currentStep = window.currentSelectionStep;
+            
+            steps.forEach((step, index) => {
+                const stepNumber = index + 1;
+                step.classList.remove('active', 'completed');
+                
+                if (stepNumber < currentStep) {
+                    step.classList.add('completed');
+                } else if (stepNumber === currentStep) {
+                    step.classList.add('active');
+                }
+            });
+        }
+
+        // Enable palette generation when all colors are selected
+        function enablePaletteGeneration() {
+            const generateBtn = document.getElementById('generateBtn');
+            generateBtn.textContent = 'Generate Palette';
+            generateBtn.disabled = false;
+            generateBtn.onclick = () => {
+                console.log('Generating palette with selected colors:', window.selectedColors);
+                generatePaletteFromSelectedColors();
+            };
+        }
+
+        // Send selected colors to backend for palette generation
+        function generatePaletteFromSelectedColors() {
+            if (!window.selectedColors.primary || !window.selectedColors.secondary || !window.selectedColors.tertiary) {
+                console.error('Not all colors selected');
+                return;
+            }
+
+            // Convert RGB colors to the format expected by the backend
+            const selectedColors = {
+                primary: {
+                    r: Math.round(window.selectedColors.primary.r * 255),
+                    g: Math.round(window.selectedColors.primary.g * 255),
+                    b: Math.round(window.selectedColors.primary.b * 255)
+                },
+                secondary: {
+                    r: Math.round(window.selectedColors.secondary.r * 255),
+                    g: Math.round(window.selectedColors.secondary.g * 255),
+                    b: Math.round(window.selectedColors.secondary.b * 255)
+                },
+                tertiary: {
+                    r: Math.round(window.selectedColors.tertiary.r * 255),
+                    g: Math.round(window.selectedColors.tertiary.g * 255),
+                    b: Math.round(window.selectedColors.tertiary.b * 255)
+                }
+            };
+
+            console.log('Sending selected colors to backend:', selectedColors);
+
+            // Send message to plugin backend
+            parent.postMessage({
+                pluginMessage: {
+                    type: 'generate-palette-from-selected',
+                    selectedColors: selectedColors
+                }
+            }, '*');
+        }
     </script>
 </body>
 </html>

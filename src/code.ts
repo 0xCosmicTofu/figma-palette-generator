@@ -14,8 +14,24 @@ figma.showUI(__html__, { width: 400, height: 600 });
 figma.ui.onmessage = async (msg: PluginMessage): Promise<void> => {
   try {
     switch (msg.type) {
+      case 'extract-image-colors':
+        await extractImageColors();
+        break;
       case 'generate-palette':
-        await generatePalette(msg.settings);
+        if (msg.selectedColors && msg.settings) {
+          await generatePaletteFromSelectedColors(msg.selectedColors, msg.settings);
+        } else {
+          figma.notify('Selected colors are required', { error: true });
+          figma.ui.postMessage({ type: 'error', message: 'Selected colors are required' });
+        }
+        break;
+      case 'generate-palette-from-selected':
+        if (msg.selectedColors) {
+          await generatePaletteFromSelectedColors(msg.selectedColors);
+        } else {
+          figma.notify('Selected colors are required', { error: true });
+          figma.ui.postMessage({ type: 'error', message: 'Selected colors are required' });
+        }
         break;
       case 'cancel':
         figma.closePlugin();
@@ -30,59 +46,114 @@ figma.ui.onmessage = async (msg: PluginMessage): Promise<void> => {
 };
 
 /**
- * Main palette generation function
+ * Extract real colors from selected image using Figma API
  */
-async function generatePalette(settings: PaletteSettings): Promise<void> {
+async function extractImageColors(): Promise<void> {
   try {
-    // Check if a frame is selected
-    if (figma.currentPage.selection.length === 0) {
-      figma.notify('Please select a frame containing images', { error: true });
-      return;
-    }
+    console.log('Extracting colors from selected image...');
 
     const selectedNode = figma.currentPage.selection[0];
     
-    // Validate selection is a frame or a single image
     if (!selectedNode) {
-      figma.notify('Please select a frame containing images or a single image', { error: true });
+      figma.notify('Please select an image first', { error: true });
+      figma.ui.postMessage({ type: 'error', message: 'No image selected' });
       return;
     }
 
-    let images: ImageNode[] = [];
+    // Check if it's a valid image node
+    if (selectedNode.type !== 'RECTANGLE' || !selectedNode.fills || !Array.isArray(selectedNode.fills) || selectedNode.fills.length === 0) {
+      figma.notify('Please select a rectangle with an image fill', { error: true });
+      figma.ui.postMessage({ type: 'error', message: 'Invalid image selection' });
+      return;
+    }
+
+    const imageFill = selectedNode.fills.find(fill => fill.type === 'IMAGE') as ImagePaint;
+    if (!imageFill || !imageFill.imageHash) {
+      figma.notify('Selected rectangle does not contain an image', { error: true });
+      figma.ui.postMessage({ type: 'error', message: 'No image found in selection' });
+      return;
+    }
+
+    // Get the image object and extract bytes
+    const image = figma.getImageByHash(imageFill.imageHash);
+    if (!image) {
+      figma.notify('Could not load image data', { error: true });
+      figma.ui.postMessage({ type: 'error', message: 'Failed to load image' });
+      return;
+    }
+
+    // Get the raw image bytes
+    const imageBytes = await image.getBytesAsync();
+    console.log('Image bytes extracted:', imageBytes.length, 'bytes');
+
+    // Send image bytes to UI for pixel analysis
+    figma.ui.postMessage({
+      type: 'image-bytes-received',
+      imageBytes: Array.from(imageBytes), // Convert Uint8Array to regular array for transfer
+      imageHash: imageFill.imageHash
+    });
     
-    if (selectedNode.type === 'FRAME') {
-      // Extract images from the frame
-      images = extractImagesFromFrame(selectedNode);
-    } else if (selectedNode.type === 'RECTANGLE' && isImageNode(selectedNode)) {
-      // Handle single image selection
-      images = extractSingleImage(selectedNode);
-    } else {
-      figma.notify('Please select a frame containing images or a single image rectangle', { error: true });
-      return;
-    }
+    console.log('Image bytes sent to UI for processing');
     
-    if (images.length === 0) {
-      figma.notify('No images found in selection. Please select a frame with images or a single image rectangle.', { error: true });
-      return;
-    }
+  } catch (error) {
+    console.error('Error extracting image colors:', error);
+    
+    figma.ui.postMessage({ 
+      type: 'error', 
+      message: error instanceof Error ? error.message : 'Failed to extract image colors' 
+    });
+    
+    figma.notify('Failed to extract colors from image', { error: true });
+  }
+}
 
-    if (images.length > 10) {
-      figma.notify('Maximum 10 images supported. Using first 10 images.', { error: false });
-    }
-
-    // Limit to 10 images
-    const limitedImages = images.slice(0, 10);
-
-    // Generate palette
-    const palette = await generateColorPalette(limitedImages);
+/**
+ * Generate complete palette from user-selected primary, secondary, tertiary colors
+ */
+async function generatePaletteFromSelectedColors(selectedColors: SelectedColors, settings?: PaletteSettings): Promise<void> {
+  try {
+    console.log('Generating palette from selected colors:', selectedColors);
+    
+    // Convert colors from 0-255 range to 0-1 range (Figma format)
+    const convertedColors: SelectedColors = {
+      primary: {
+        r: selectedColors.primary.r / 255,
+        g: selectedColors.primary.g / 255,
+        b: selectedColors.primary.b / 255
+      },
+      secondary: {
+        r: selectedColors.secondary.r / 255,
+        g: selectedColors.secondary.g / 255,
+        b: selectedColors.secondary.b / 255
+      },
+      tertiary: {
+        r: selectedColors.tertiary.r / 255,
+        g: selectedColors.tertiary.g / 255,
+        b: selectedColors.tertiary.b / 255
+      }
+    };
+    
+    console.log('Converted colors to Figma format:', convertedColors);
+    
+    // Use default settings if none provided
+    const defaultSettings: PaletteSettings = {
+      scaleSteps: 9,
+      harmonyTypes: ['analogous', 'complementary', 'triadic', 'split-complementary'],
+      accessibility: true
+    };
+    
+    const finalSettings = settings || defaultSettings;
+    
+    // Generate complete palette using the converted colors
+    const palette = generateColorPaletteFromSelectedColors(convertedColors, finalSettings);
     
     // Create output frames with settings
-    await createPaletteFrames(palette, settings);
+    await createPaletteFrames(palette, finalSettings);
     
     // Send success message to UI
     figma.ui.postMessage({ type: 'palette-generated' });
     
-    figma.notify('Palette generated successfully!', { error: false });
+    figma.notify('Design system generated successfully!', { error: false });
     
   } catch (error) {
     console.error('Error generating palette:', error);
@@ -96,6 +167,70 @@ async function generatePalette(settings: PaletteSettings): Promise<void> {
     figma.notify('Failed to generate palette', { error: true });
   }
 }
+
+// Removed median cut functions - using manual color picker instead
+
+/**
+ * Select the best primary color candidates from extracted colors
+ */
+function selectBestPrimaryCandidates(colors: RGB[], count: number): RGB[] {
+  // Score colors based on vibrancy, uniqueness, and suitability as primaries
+  const scoredColors = colors.map(color => {
+    const hsl = rgbToHsl(color.r, color.g, color.b);
+    
+    // Vibrancy score (prefer high saturation, avoid too light/dark)
+    const vibrancyScore = hsl.s * (1 - Math.abs(hsl.l - 0.5) * 2);
+    
+    // Avoid muddy colors (low saturation + mid lightness)
+    const mudPenalty = hsl.s < 0.3 && hsl.l > 0.3 && hsl.l < 0.7 ? -0.5 : 0;
+    
+    // Slight preference for warmer hues (often work better as primaries)
+    const huePreference = (hsl.h >= 0 && hsl.h <= 60) || (hsl.h >= 300 && hsl.h <= 360) ? 0.1 : 0;
+    
+    const totalScore = vibrancyScore + mudPenalty + huePreference;
+    
+    return { color, score: totalScore, hue: hsl.h };
+  });
+
+  // Sort by score and select diverse candidates
+  scoredColors.sort((a, b) => b.score - a.score);
+  
+  const candidates: RGB[] = [];
+  const usedHueRanges: number[] = [];
+  const hueSpacing = 360 / count; // Aim for good hue distribution
+  
+  for (const scored of scoredColors) {
+    if (candidates.length >= count) break;
+    
+    // Check if this hue is too close to already selected hues
+    const tooClose = usedHueRanges.some(usedHue => {
+      const hueDiff = Math.min(
+        Math.abs(scored.hue - usedHue),
+        360 - Math.abs(scored.hue - usedHue)
+      );
+      return hueDiff < hueSpacing * 0.7; // Allow some overlap but encourage diversity
+    });
+    
+    if (!tooClose || candidates.length < 2) { // Always take first 2 regardless
+      candidates.push(scored.color);
+      usedHueRanges.push(scored.hue);
+    }
+  }
+  
+  // If we don't have enough candidates, fill with the highest scoring ones
+  while (candidates.length < count && candidates.length < scoredColors.length) {
+    const remaining = scoredColors.filter(s => !candidates.includes(s.color));
+    if (remaining.length > 0 && remaining[0]) {
+      candidates.push(remaining[0].color);
+    } else {
+      break;
+    }
+  }
+
+  return candidates;
+}
+
+// Legacy generatePalette function removed - using simplified generatePaletteFromPrimary approach
 
 /**
  * Extract bitmap images from a frame
@@ -175,9 +310,178 @@ function extractSingleImage(node: RectangleNode): ImageNode[] {
 }
 
 /**
+ * Generate color palette from user-selected primary, secondary, tertiary colors
+ */
+function generateColorPaletteFromSelectedColors(selectedColors: SelectedColors, settings: PaletteSettings): PaletteData {
+  console.log('Generating palette from selected colors:', selectedColors);
+  
+  // Use the user-selected colors directly
+  const primary = selectedColors.primary;
+  const secondary = selectedColors.secondary;
+  const tertiary = selectedColors.tertiary;
+  
+  // Build color families from user selections
+  const brandColors = [primary, secondary, tertiary];
+  console.log('Using selected brand color family:', brandColors);
+  
+  // Generate color scales (000-900 or 050-950 etc.) for each brand color
+  const colorScales = generateColorScales(brandColors, settings.scaleSteps);
+  
+  // Generate harmony colors based on the selected primary color
+  const harmonyColors = generateHarmonyColorsFromPrimary(primary, settings.harmonyTypes);
+  
+  // Generate light and dark mode colors
+  const lightMode = generateModeColors(brandColors, 'light');
+  const darkMode = generateModeColors(brandColors, 'dark');
+  
+  // Generate accessible versions if requested
+  const accessibleLight = settings.accessibility ? generateAccessibleColors(lightMode) : lightMode;
+  const accessibleDark = settings.accessibility ? generateAccessibleColors(darkMode) : darkMode;
+  
+  // Generate monotone scale
+  const monotoneScale = generateSimpleMonotoneScale();
+  
+  const palette: PaletteData = {
+    primary: primary,
+    secondary: secondary,
+    tertiary: tertiary,
+    scales: colorScales,
+    harmonies: convertToHarmonies(harmonyColors),
+    lightMode: lightMode,
+    darkMode: darkMode,
+    accessibleLight: accessibleLight,
+    accessibleDark: accessibleDark,
+    monotoneScale: monotoneScale
+  };
+  
+  console.log('Generated complete palette:', palette);
+  return palette;
+}
+
+/**
+ * Generate harmony colors from primary color
+ */
+interface HarmonyColor {
+  name: string;
+  colors: RGB[];
+}
+
+function generateHarmonyColorsFromPrimary(primaryColor: RGB, harmonyTypes: string[]): HarmonyColor[] {
+  const harmonies: HarmonyColor[] = [];
+  const primaryHsl = rgbToHsl(primaryColor.r, primaryColor.g, primaryColor.b);
+  
+  if (harmonyTypes.includes('analogous')) {
+    const analogous = [
+      hslToRgb((primaryHsl.h - 30 + 360) % 360 / 360, primaryHsl.s, primaryHsl.l),
+      primaryColor,
+      hslToRgb((primaryHsl.h + 30) % 360 / 360, primaryHsl.s, primaryHsl.l)
+    ];
+    harmonies.push({ name: 'Analogous', colors: analogous });
+  }
+  
+  if (harmonyTypes.includes('complementary')) {
+    const complementary = [
+      hslToRgb((primaryHsl.h + 180) % 360 / 360, primaryHsl.s, primaryHsl.l)
+    ];
+    harmonies.push({ name: 'Complementary', colors: complementary });
+  }
+  
+  if (harmonyTypes.includes('triadic')) {
+    const triadic = [
+      primaryColor,
+      hslToRgb((primaryHsl.h + 120) % 360 / 360, primaryHsl.s, primaryHsl.l),
+      hslToRgb((primaryHsl.h + 240) % 360 / 360, primaryHsl.s, primaryHsl.l)
+    ];
+    harmonies.push({ name: 'Triadic', colors: triadic });
+  }
+  
+  if (harmonyTypes.includes('splitComplementary')) {
+    const splitComp = [
+      primaryColor,
+      hslToRgb((primaryHsl.h + 150) % 360 / 360, primaryHsl.s, primaryHsl.l),
+      hslToRgb((primaryHsl.h + 210) % 360 / 360, primaryHsl.s, primaryHsl.l)
+    ];
+    harmonies.push({ name: 'Split-Complementary', colors: splitComp });
+  }
+  
+  return harmonies;
+}
+
+/**
+ * Generate mode-specific colors (light/dark)
+ */
+function generateModeColors(colors: RGB[], mode: 'light' | 'dark'): RGB[] {
+  return colors.map(color => {
+    const hsl = rgbToHsl(color.r, color.g, color.b);
+    
+    if (mode === 'light') {
+      // Lighten and reduce saturation slightly for light mode
+      return hslToRgb(hsl.h, hsl.s * 0.9, Math.min(hsl.l * 1.2, 0.9));
+    } else {
+      // Darken and boost saturation slightly for dark mode  
+      return hslToRgb(hsl.h, Math.min(hsl.s * 1.1, 1), hsl.l * 0.8);
+    }
+  });
+}
+
+/**
+ * Convert HarmonyColor array to ColorHarmonies interface
+ */
+function convertToHarmonies(harmonies: HarmonyColor[]): ColorHarmonies {
+  const result: ColorHarmonies = {
+    analogous: [],
+    complementary: [],
+    triadic: [],
+    splitComplementary: []
+  };
+  
+  harmonies.forEach(harmony => {
+    switch (harmony.name.toLowerCase()) {
+      case 'analogous':
+        result.analogous = harmony.colors;
+        break;
+      case 'complementary':
+        result.complementary = harmony.colors;
+        break;
+      case 'triadic':
+        result.triadic = harmony.colors;
+        break;
+      case 'split-complementary':
+        result.splitComplementary = harmony.colors;
+        break;
+    }
+  });
+  
+  return result;
+}
+
+/**
+ * Generate simple monotone scale
+ */
+function generateSimpleMonotoneScale(): RGB[] {
+  return [
+    { r: 1, g: 1, b: 1 },       // White
+    { r: 0.9, g: 0.9, b: 0.9 }, // Light gray
+    { r: 0.7, g: 0.7, b: 0.7 }, // Medium gray
+    { r: 0.5, g: 0.5, b: 0.5 }, // Gray
+    { r: 0.3, g: 0.3, b: 0.3 }, // Dark gray
+    { r: 0, g: 0, b: 0 }        // Black
+  ];
+}
+
+/**
+ * Generate accessible versions of colors (placeholder - would need proper WCAG implementation)
+ */
+function generateAccessibleColors(colors: RGB[]): RGB[] {
+  // For now, return the same colors. In a full implementation, 
+  // this would adjust colors to meet WCAG contrast requirements
+  return colors;
+}
+
+/**
  * Generate color palette from images using median cut algorithm
  */
-async function generateColorPalette(images: ImageNode[]): Promise<PaletteData> {
+async function generateColorPalette(images: ImageNode[], settings: PaletteSettings): Promise<PaletteData> {
   try {
     console.log('Starting color palette generation for', images.length, 'images');
     
@@ -198,14 +502,15 @@ async function generateColorPalette(images: ImageNode[]): Promise<PaletteData> {
     
     // Determine the brightest color across all weighted pixels (by saturation + luminance)
     const brightestPrimary = selectBrightestColor(weightedPixels);
-    console.log('Brightest primary color selected:', brightestPrimary);
+    const primaryHsl = rgbToHsl(brightestPrimary.r, brightestPrimary.g, brightestPrimary.b);
+    console.log('Selected primary color:', brightestPrimary);
 
     // Build a cohesive family (primary/secondary/tertiary) from the brightest primary
     const primaryColors = buildColorFamilyFromPrimary(brightestPrimary);
     console.log('Constructed primary color family:', primaryColors);
     
     // Generate color scales and harmonies
-    const scales = generateColorScales(primaryColors);
+    const scales = generateColorScales(primaryColors, settings.scaleSteps);
     const harmonies = generateHarmonies(primaryColors);
     
     // Generate mode-specific palettes
@@ -221,7 +526,8 @@ async function generateColorPalette(images: ImageNode[]): Promise<PaletteData> {
       lightMode: modePalettes.light,
       darkMode: modePalettes.dark,
       accessibleLight: accessiblePalettes.light,
-      accessibleDark: accessiblePalettes.dark
+      accessibleDark: accessiblePalettes.dark,
+      monotoneScale: generateSimpleMonotoneScale()
     };
     
     console.log('Generated palette result:', result);
@@ -247,7 +553,8 @@ async function generateColorPalette(images: ImageNode[]): Promise<PaletteData> {
       lightMode: generateModeSpecificPalettes(fallbackColors).light,
       darkMode: generateModeSpecificPalettes(fallbackColors).dark,
       accessibleLight: generateAccessiblePalettes(fallbackColors).light,
-      accessibleDark: generateAccessiblePalettes(fallbackColors).dark
+      accessibleDark: generateAccessiblePalettes(fallbackColors).dark,
+      monotoneScale: generateSimpleMonotoneScale()
     };
   }
 }
@@ -278,17 +585,13 @@ async function extractWeightedPixels(images: ImageNode[]): Promise<RGB[]> {
       const weight = Math.sqrt(image.width * image.height) / 100; // Normalize weight
       const pixelCount = Math.floor(weight * 800); // Reduced from 1000 to prevent over-sampling
       
-      console.log(`Processing image ${imageIndex}: ${image.width}x${image.height}, weight: ${weight}, pixels: ${pixelCount}`);
-      
       // Extract pixels with weighting
       const pixels = await extractPixelsFromImage(imageData, pixelCount, imageIndex);
       
       // Add weighted pixels to collection with image-specific variation
       for (let i = 0; i < pixels.length; i++) {
         allPixels.push(pixels[i]!);
-      }
-      
-      console.log(`Image ${imageIndex} contributed ${pixels.length} pixels`);
+      };
       
     } catch (error) {
       console.warn(`Failed to process image ${imageIndex}:`, error);
@@ -353,170 +656,277 @@ function generateMoodboardColors(imageCount: number): RGB[] {
 }
 
 /**
- * Extract pixels from a Figma image
- * Enhanced approach that generates more varied colors based on image characteristics
+ * Estimate dominant color characteristics from image metadata
+ */
+function estimateDominantColorRange(imageData: Image, imageIndex: number): ColorEstimation {
+  const hashString = imageData.hash;
+  
+  // Analyze hash characteristics for color family estimation
+  const hashAnalysis = analyzeHashCharacteristics(hashString);
+  
+  // Estimate color temperature and family based on hash patterns
+  const estimation: ColorEstimation = {
+    hueRange: estimateHueRange(hashAnalysis, imageIndex),
+    saturationBias: estimateSaturationBias(hashAnalysis),
+    lightnessBias: estimateLightnessBias(hashAnalysis),
+    warmth: estimateWarmth(hashAnalysis),
+    vibrancy: estimateVibrancy(hashAnalysis)
+  };
+  
+  console.log(`🔍 Image ${imageIndex} ESTIMATION:`, 
+    `Hue: ${estimation.hueRange[0].toFixed(1)}°-${estimation.hueRange[1].toFixed(1)}°`, 
+    `Sat: ${estimation.saturationBias.toFixed(3)}`, 
+    `Light: ${estimation.lightnessBias.toFixed(3)}`, 
+    `${estimation.warmth}`, 
+    `${estimation.vibrancy}`
+  );
+  return estimation;
+}
+
+/**
+ * Analyze hash string to extract color-indicative patterns
+ */
+function analyzeHashCharacteristics(hashString: string): HashAnalysis {
+  const chars = hashString.split('');
+  const charCodes = chars.map(c => c.charCodeAt(0));
+  
+  return {
+    length: hashString.length,
+    sum: charCodes.reduce((a, b) => a + b, 0),
+    average: charCodes.reduce((a, b) => a + b, 0) / charCodes.length,
+    variance: calculateVariance(charCodes),
+    hexDigitCount: chars.filter(c => /[0-9a-f]/i.test(c)).length,
+    patternScore: calculatePatternScore(hashString),
+    alphaRatio: chars.filter(c => /[a-z]/i.test(c)).length / chars.length,
+    digitRatio: chars.filter(c => /[0-9]/.test(c)).length / chars.length
+  };
+}
+
+/**
+ * Estimate likely hue range based on hash analysis
+ */
+function estimateHueRange(analysis: HashAnalysis, imageIndex: number): [number, number] {
+  // Use hash to create a base hue, but with much more conservative logic
+  const baseHue = (analysis.sum % 360);
+  
+  // Create a much smaller, more realistic range
+  // Most images contain colors within 60-90 degrees of each other
+  const baseRangeWidth = 60; // Conservative base range
+  const varianceInfluence = Math.min(analysis.variance * 0.5, 30); // Limited variance influence
+  
+  // Use pattern score to slightly adjust range, but conservatively
+  const patternAdjustment = Math.min(analysis.patternScore * 15, 20);
+  const finalRangeWidth = baseRangeWidth + varianceInfluence + patternAdjustment;
+  
+  // Cap the maximum range at 90 degrees to prevent wild swings
+  const rangeWidth = Math.min(finalRangeWidth, 90);
+  
+  // Use a more subtle approach to warm/cool bias
+  let centerHue = baseHue;
+  
+  // Only apply subtle shifts based on character composition
+  if (analysis.alphaRatio > 0.7) {
+    // Slight warm bias for very letter-heavy hashes
+    centerHue = (baseHue + 15) % 360;
+  } else if (analysis.digitRatio > 0.7) {
+    // Slight cool bias for very number-heavy hashes  
+    centerHue = (baseHue - 15 + 360) % 360;
+  }
+  
+  // Minimal image index variation to avoid dramatic shifts
+  centerHue = (centerHue + imageIndex * 5) % 360;
+  
+  const startHue = (centerHue - rangeWidth / 2 + 360) % 360;
+  const endHue = (centerHue + rangeWidth / 2) % 360;
+  
+  return [startHue, endHue];
+}
+
+/**
+ * Extract pixels from a Figma image with enhanced generation and color estimation
  */
 async function extractPixelsFromImage(imageData: Image, sampleCount: number, imageIndex: number): Promise<RGB[]> {
   const pixels: RGB[] = [];
+
+  // Use hash and image metadata to create image-specific color characteristics
+  const hash = imageData.hash;
+  const hashChars = hash.split('');
   
-  // Generate colors based on the image hash with enhanced variation
-  const hashString = imageData.hash;
-  let hashValue = 0;
+  // Analyze hash to extract image-specific color tendencies
+  const hashSum = hashChars.reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  const hashLength = hash.length;
   
-  for (let i = 0; i < hashString.length; i++) {
-    hashValue += hashString.charCodeAt(i);
-  }
+  // Extract different characteristics from different parts of the hash
+  const hueBase = (hashSum % 360); // Primary hue tendency
+  const saturationBias = ((hashSum / 100) % 1); // Saturation tendency (0-1)
+  const lightnessBias = ((hashSum / 200) % 1); // Lightness tendency (0-1)
   
-  // Create a more sophisticated color generation based on hash characteristics
-  const hashLength = hashString.length;
-  const hashSum = hashValue;
-  const hashProduct = hashString.split('').reduce((acc, char) => acc * char.charCodeAt(0), 1);
+  // Create multiple color families based on the image
+  const colorFamilies = [
+    { hueCenter: hueBase, weight: 0.4 }, // Primary family
+    { hueCenter: (hueBase + 120) % 360, weight: 0.3 }, // Secondary family
+    { hueCenter: (hueBase + 240) % 360, weight: 0.2 }, // Tertiary family
+    { hueCenter: (hueBase + 60) % 360, weight: 0.1 }  // Accent family
+  ];
   
-  // Generate base colors with more variation, incorporating image index
+  // Generate colors weighted toward these families
   for (let i = 0; i < sampleCount; i++) {
-    const seed1 = (hashSum + i * 12345 + imageIndex * 100000) % 1000000;
-    const seed2 = (hashProduct + i * 67890 + imageIndex * 200000) % 1000000;
-    const seed3 = (hashLength * 1000 + i * 11111 + imageIndex * 300000) % 1000000;
+    // Create image-specific seed that varies per sample
+    const seed = (hashSum + i * 7919 + imageIndex * 50000 + hashLength * 1000) % 1000000;
+    const random1 = (seed % 1000) / 1000;
+    const random2 = ((seed / 1000) % 1000) / 1000;
+    const random3 = ((seed / 1000000) % 1000) / 1000;
     
-    // Combine multiple seeds for more variety
-    const combinedSeed = (seed1 + seed2 + seed3) % 1000000;
+    // Choose a color family based on weights
+    let selectedFamily = colorFamilies[0]!; // We know this exists
+    let weightSum = 0;
+    for (const family of colorFamilies) {
+      weightSum += family.weight;
+      if (random1 <= weightSum) {
+        selectedFamily = family;
+        break;
+      }
+    }
     
-             // Generate more varied and vibrant colors
-         const hue = (combinedSeed * 360) / 1000000;
-         const saturation = 0.2 + (seed1 % 80) / 100; // 0.2 to 1.0 (full range, more low-sat)
-         const lightness = 0.1 + (seed2 % 80) / 100;  // 0.1 to 0.9 (full range, more extremes)
+    // Generate hue around the selected family center
+    const hueSpread = 40; // Degrees of spread around center
+    const hue = (selectedFamily.hueCenter + (random2 - 0.5) * hueSpread + 360) % 360;
     
-    const { r, g, b } = hslToRgb(hue, saturation, lightness);
-    pixels.push({ r, g, b });
+    // Use hash-biased saturation and lightness with variation
+    const saturation = Math.max(0.3, Math.min(0.95, saturationBias * 0.7 + random3 * 0.5));
+    const lightness = Math.max(0.2, Math.min(0.8, lightnessBias * 0.6 + random2 * 0.4));
+    
+    const color = hslToRgb(hue / 360, saturation, lightness);
+    pixels.push(color);
   }
-  
-  // Generate complementary and analogous colors with more variation, incorporating image index
-  const baseHue1 = ((hashSum + imageIndex * 100000) * 360) / 1000000;
-  const baseHue2 = ((hashProduct + imageIndex * 200000) * 360) / 1000000;
-  const baseHue3 = ((hashLength + imageIndex * 300000) * 360) / 1000000;
-  
-  // Create more diverse color relationships
-  const complementaryHue1 = (baseHue1 + 180) % 360;
-  const complementaryHue2 = (baseHue2 + 180) % 360;
-  const analogousHue1 = (baseHue1 + 45) % 360;
-  const analogousHue2 = (baseHue1 - 45 + 360) % 360;
-  const triadicHue1 = (baseHue1 + 120) % 360;
-  const triadicHue2 = (baseHue1 + 240) % 360;
-  
-           // Add these specific colors for better palette variety
-         const additionalColors = [
-           { hue: baseHue1, saturation: 1.0, lightness: 0.5 },      // Maximum saturation
-           { hue: complementaryHue1, saturation: 1.0, lightness: 0.4 }, // Maximum saturation
-           { hue: analogousHue1, saturation: 0.95, lightness: 0.55 },    // Very high saturation
-           { hue: analogousHue2, saturation: 0.95, lightness: 0.45 },    // Very high saturation
-           { hue: triadicHue1, saturation: 0.9, lightness: 0.6 },       // Very high saturation
-           { hue: triadicHue2, saturation: 0.9, lightness: 0.5 },       // Very high saturation
-           { hue: baseHue2, saturation: 1.0, lightness: 0.4 },          // Maximum saturation
-           { hue: baseHue3, saturation: 0.95, lightness: 0.6 }          // Very high saturation
-         ];
-  
-  for (const colorSpec of additionalColors) {
-    const { r, g, b } = hslToRgb(colorSpec.hue, colorSpec.saturation, colorSpec.lightness);
-    pixels.push({ r, g, b });
-  }
-  
+
   return pixels;
 }
 
 /**
- * Median Cut Algorithm for color quantization
+ * Generate color biased toward estimated dominant range
  */
-function medianCut(pixels: RGB[], numColors: number): RGB[] {
-  if (pixels.length === 0) {
-    return generateDefaultColors(numColors);
+function generateBiasedColor(analysis: HashAnalysis, estimation: ColorEstimation, index: number, imageIndex: number): RGB {
+  const seed = (analysis.sum + index * 7919 + imageIndex * 50000) % 1000000;
+  
+  // Generate hue within estimated range
+  const [hueStart, hueEnd] = estimation.hueRange;
+  let hue: number;
+  
+  if (hueStart <= hueEnd) {
+    hue = hueStart + ((seed * (hueEnd - hueStart)) / 1000000);
+  } else {
+    // Handle wrap-around (e.g., 350-30 degrees)
+    const range = (360 - hueStart) + hueEnd;
+    const hueOffset = (seed * range) / 1000000;
+    hue = hueOffset <= (360 - hueStart) ? hueStart + hueOffset : hueOffset - (360 - hueStart);
   }
   
-  // Start with all pixels in one bucket
-  let buckets: RGB[][] = [pixels];
+  // Apply saturation bias
+  const baseSaturation = 0.4 + (seed % 500) / 1000; // 0.4 to 0.9
+  const saturation = Math.min(1, baseSaturation * estimation.saturationBias);
   
-  // Split buckets until we have the desired number of colors
-  while (buckets.length < numColors) {
-    const bucketToSplit = findLargestBucket(buckets);
-    if (!bucketToSplit) break;
-    
-    const [bucket1, bucket2] = splitBucket(bucketToSplit);
-    buckets.splice(buckets.indexOf(bucketToSplit), 1, bucket1, bucket2);
-  }
+  // Apply lightness bias
+  const baseLightness = 0.2 + (seed % 600) / 1000; // 0.2 to 0.8
+  const lightness = clamp(baseLightness * estimation.lightnessBias, 0.1, 0.9);
   
-  // Calculate the average color for each bucket
-  return buckets.map(bucket => calculateAverageColor(bucket));
+  return hslToRgb(hue, saturation, lightness);
 }
 
 /**
- * Find the bucket with the most pixels
+ * Generate harmonic colors (complementary, analogous)
  */
-function findLargestBucket(buckets: RGB[][]): RGB[] | null {
-  if (buckets.length === 0) return null;
+function generateHarmonicColor(analysis: HashAnalysis, estimation: ColorEstimation, index: number, imageIndex: number): RGB {
+  const seed = (analysis.average * 1000 + index * 5347 + imageIndex * 75000) % 1000000;
   
-  let largestBucket = buckets[0]!;
-  let maxSize = largestBucket.length;
+  // Get base hue from estimation center
+  const [hueStart, hueEnd] = estimation.hueRange;
+  const centerHue = hueStart <= hueEnd ? (hueStart + hueEnd) / 2 : ((hueStart + hueEnd + 360) / 2) % 360;
   
-  for (const bucket of buckets) {
-    if (bucket.length > maxSize) {
-      largestBucket = bucket;
-      maxSize = bucket.length;
-    }
-  }
+  // Generate harmonic relationships
+  const harmonicOffset = index % 3 === 0 ? 180 : index % 3 === 1 ? 30 : -30; // Complementary or analogous
+  const hue = (centerHue + harmonicOffset + 360) % 360;
   
-  return largestBucket;
+  const saturation = 0.5 + (seed % 400) / 1000; // 0.5 to 0.9
+  const lightness = 0.3 + (seed % 400) / 1000;  // 0.3 to 0.7
+  
+  return hslToRgb(hue, saturation, lightness);
 }
 
 /**
- * Split a bucket of pixels along its longest dimension
+ * Generate accent colors for variety
  */
-function splitBucket(bucket: RGB[]): [RGB[], RGB[]] {
-  if (bucket.length <= 1) {
-    return [bucket, []];
-  }
+function generateAccentColor(analysis: HashAnalysis, estimation: ColorEstimation, index: number, imageIndex: number): RGB {
+  const seed = (analysis.variance + index * 3571 + imageIndex * 25000) % 1000000;
   
-  // Find the color channel with the greatest range
-  const ranges = calculateColorRanges(bucket);
-  const maxRange = Math.max(ranges.r, ranges.g, ranges.b);
+  // More random hue for accents, but still influenced by estimation
+  const randomHue = (seed * 360) / 1000000;
+  const [estStart, estEnd] = estimation.hueRange;
+  const estCenter = estStart <= estEnd ? (estStart + estEnd) / 2 : ((estStart + estEnd + 360) / 2) % 360;
   
-  let splitChannel: 'r' | 'g' | 'b';
-  if (maxRange === ranges.r) splitChannel = 'r';
-  else if (maxRange === ranges.g) splitChannel = 'g';
-  else splitChannel = 'b';
+  // Blend random with estimated (70% random, 30% estimated influence)
+  const hue = (randomHue * 0.7 + estCenter * 0.3) % 360;
   
-  // Sort pixels by the chosen channel
-  bucket.sort((a, b) => a[splitChannel] - b[splitChannel]);
+  const saturation = 0.3 + (seed % 600) / 1000; // 0.3 to 0.9 - broader range
+  const lightness = 0.2 + (seed % 700) / 1000;  // 0.2 to 0.9 - broader range
   
-  // Split at the median
-  const medianIndex = Math.floor(bucket.length / 2);
-  const bucket1 = bucket.slice(0, medianIndex);
-  const bucket2 = bucket.slice(medianIndex);
-  
-  return [bucket1, bucket2];
+  return hslToRgb(hue, saturation, lightness);
 }
 
 /**
- * Calculate the range of values for each color channel
+ * Helper functions for color estimation
  */
-function calculateColorRanges(bucket: RGB[]): { r: number; g: number; b: number } {
-  if (bucket.length === 0) return { r: 0, g: 0, b: 0 };
-  
-  let minR = 1, maxR = 0, minG = 1, maxG = 0, minB = 1, maxB = 0;
-  
-  for (const pixel of bucket) {
-    minR = Math.min(minR, pixel.r);
-    maxR = Math.max(maxR, pixel.r);
-    minG = Math.min(minG, pixel.g);
-    maxG = Math.max(maxG, pixel.g);
-    minB = Math.min(minB, pixel.b);
-    maxB = Math.max(maxB, pixel.b);
+function calculateVariance(numbers: number[]): number {
+  const mean = numbers.reduce((a, b) => a + b, 0) / numbers.length;
+  const squaredDiffs = numbers.map(n => Math.pow(n - mean, 2));
+  return squaredDiffs.reduce((a, b) => a + b, 0) / numbers.length;
+}
+
+function calculatePatternScore(str: string): number {
+  // Simple pattern analysis - repeated characters indicate more structured hashes
+  const charMap = new Map<string, number>();
+  for (const char of str) {
+    charMap.set(char, (charMap.get(char) || 0) + 1);
   }
   
-  return {
-    r: maxR - minR,
-    g: maxG - minG,
-    b: maxB - minB
-  };
+  let patternScore = 0;
+  for (const count of charMap.values()) {
+    if (count > 1) patternScore += count * 0.1;
+  }
+  
+  return Math.min(patternScore, 1); // Cap at 1
 }
+
+function estimateSaturationBias(analysis: HashAnalysis): number {
+  // More conservative saturation estimation
+  const varianceNorm = Math.min(analysis.variance / 3000, 0.5); // Reduced influence
+  const patternBonus = analysis.patternScore * 0.15; // Reduced bonus
+  return 0.6 + varianceNorm * 0.3 + patternBonus; // 0.6 to 1.05 range (more conservative)
+}
+
+function estimateLightnessBias(analysis: HashAnalysis): number {
+  // More conservative lightness estimation
+  const avgNorm = analysis.average / 127; // Normalize to 0-1
+  const lightnessBias = 0.5 + (avgNorm - 0.5) * 0.2; // Reduced range: 0.4 to 0.6
+  return Math.max(0.4, Math.min(0.8, lightnessBias)); // 0.4 to 0.8 range (more centered)
+}
+
+function estimateWarmth(analysis: HashAnalysis): 'warm' | 'cool' | 'neutral' {
+  if (analysis.alphaRatio > 0.6) return 'warm';
+  if (analysis.digitRatio > 0.6) return 'cool';
+  return 'neutral';
+}
+
+function estimateVibrancy(analysis: HashAnalysis): 'high' | 'medium' | 'low' {
+  const vibrancyScore = analysis.patternScore + (analysis.variance / 3000);
+  if (vibrancyScore > 0.7) return 'high';
+  if (vibrancyScore > 0.3) return 'medium';
+  return 'low';
+}
+
+// Removed old median cut algorithm - using manual color picker interface
+
+// Removed old median cut support functions - using manual color picker interface
 
 /**
  * Calculate the average color of a bucket of pixels
@@ -698,22 +1108,59 @@ function selectPrimaryColors(colors: RGB[]): RGB[] {
 }
 
 /**
- * Generate color scales (000-900) for each primary color
+ * Generate color scales with configurable steps for each primary color
  */
-function generateColorScales(colors: RGB[]): ColorScale[] {
+function generateColorScales(colors: RGB[], scaleSteps: number = 9): ColorScale[] {
   return colors.map(color => {
-    const scale: ColorScale = {
-      '000': lightenColor(color, 0.95), // Almost white
-      '100': lightenColor(color, 0.8),  // Very light
-      '200': lightenColor(color, 0.6),  // Light
-      '300': lightenColor(color, 0.4),  // Medium light
-      '400': lightenColor(color, 0.2),  // Slightly light
-      '500': color,                     // Base color
-      '600': darkenColor(color, 0.2),   // Slightly dark
-      '700': darkenColor(color, 0.4),   // Medium dark
-      '800': darkenColor(color, 0.6),   // Dark
-      '900': darkenColor(color, 0.8)    // Very dark
-    };
+    const scale: ColorScale = {};
+    
+    // Generate the appropriate number of steps
+    if (scaleSteps === 5) {
+      // 5 steps: 100, 300, 500, 700, 900
+      scale['100'] = lightenColor(color, 0.8);
+      scale['300'] = lightenColor(color, 0.4);
+      scale['500'] = color; // Base color
+      scale['700'] = darkenColor(color, 0.4);
+      scale['900'] = darkenColor(color, 0.8);
+    } else if (scaleSteps === 9) {
+      // 9 steps: 100-900 (excluding 000)
+      scale['100'] = lightenColor(color, 0.8);
+      scale['200'] = lightenColor(color, 0.6);
+      scale['300'] = lightenColor(color, 0.4);
+      scale['400'] = lightenColor(color, 0.2);
+      scale['500'] = color; // Base color
+      scale['600'] = darkenColor(color, 0.2);
+      scale['700'] = darkenColor(color, 0.4);
+      scale['800'] = darkenColor(color, 0.6);
+      scale['900'] = darkenColor(color, 0.8);
+    } else if (scaleSteps === 13) {
+      // 13 steps: 000-900 + additional intermediate steps
+      scale['000'] = lightenColor(color, 0.95);
+      scale['050'] = lightenColor(color, 0.9);
+      scale['100'] = lightenColor(color, 0.8);
+      scale['200'] = lightenColor(color, 0.6);
+      scale['300'] = lightenColor(color, 0.4);
+      scale['400'] = lightenColor(color, 0.2);
+      scale['500'] = color; // Base color
+      scale['600'] = darkenColor(color, 0.2);
+      scale['700'] = darkenColor(color, 0.4);
+      scale['800'] = darkenColor(color, 0.6);
+      scale['900'] = darkenColor(color, 0.8);
+      scale['950'] = darkenColor(color, 0.9);
+      scale['999'] = darkenColor(color, 0.95);
+    } else {
+      // Default fallback to 9 steps
+      scale['100'] = lightenColor(color, 0.8);
+      scale['200'] = lightenColor(color, 0.6);
+      scale['300'] = lightenColor(color, 0.4);
+      scale['400'] = lightenColor(color, 0.2);
+      scale['500'] = color;
+      scale['600'] = darkenColor(color, 0.2);
+      scale['700'] = darkenColor(color, 0.4);
+      scale['800'] = darkenColor(color, 0.6);
+      scale['900'] = darkenColor(color, 0.8);
+    }
+    
     return scale;
   });
 }
@@ -833,7 +1280,7 @@ async function createPaletteFrames(palette: PaletteData, settings: PaletteSettin
     
     console.log('Creating color scales...');
     // Create color scale frames
-    await createColorScales(mainFrame, palette);
+    await createColorScales(mainFrame, palette, settings);
     
     console.log('Creating harmony palettes...');
     // Create harmony frames
@@ -866,14 +1313,15 @@ async function createPaletteFrames(palette: PaletteData, settings: PaletteSettin
 /**
  * Create color scale frames
  */
-async function createColorScales(parentFrame: FrameNode, palette: PaletteData): Promise<void> {
+async function createColorScales(parentFrame: FrameNode, palette: PaletteData, settings: PaletteSettings): Promise<void> {
   try {
     console.log('Creating color scales for palette:', palette);
     
     const scaleNames = ['Primary', 'Secondary', 'Tertiary'];
-    const scales = [palette.scales[0], palette.scales[1], palette.scales[2]];
+    const scales = palette.scales;
     
     console.log('Available scales:', scales);
+    console.log('Number of scales:', scales.length);
     
     for (let i = 0; i < scaleNames.length; i++) {
       console.log(`Creating scale ${i}: ${scaleNames[i]}`);
@@ -915,8 +1363,16 @@ async function createColorScales(parentFrame: FrameNode, palette: PaletteData): 
       swatchesContainer.fills = []; // No fill (transparent)
       scaleFrame.appendChild(swatchesContainer);
       
-      // Create color swatches
-      const scaleSteps = ['000', '100', '200', '300', '400', '500', '600', '700', '800', '900'];
+      // Create color swatches - get actual scale steps from the generated scale
+      const currentScale = scales[i];
+      if (!currentScale) {
+        console.warn(`No scale found for index ${i}, skipping`);
+        continue;
+      }
+      
+      const scaleSteps = Object.keys(currentScale).sort();
+      console.log(`Scale ${i} has steps:`, scaleSteps);
+      
       for (let j = 0; j < scaleSteps.length; j++) {
         // Create container for swatch + label (vertical layout)
         const swatchContainer = figma.createFrame();
@@ -939,7 +1395,7 @@ async function createColorScales(parentFrame: FrameNode, palette: PaletteData): 
         swatch.resize(40, 40);
         swatch.cornerRadius = 4;
         
-        const color = scales[i]![scaleSteps[j] as keyof ColorScale];
+        const color = currentScale[scaleSteps[j] as keyof ColorScale];
         console.log(`Creating swatch ${scaleSteps[j]} with color:`, color);
         
         if (color) {
@@ -1514,8 +1970,15 @@ function rgbToHsl(r: number, g: number, b: number): { h: number; s: number; l: n
 
 // Type definitions
 interface PluginMessage {
-  type: string;
-  [key: string]: any;
+  type: 'extract-image-colors' | 'generate-palette' | 'generate-palette-from-selected' | 'cancel';
+  selectedColors?: SelectedColors;
+  settings?: PaletteSettings;
+}
+
+interface SelectedColors {
+  primary: RGB;
+  secondary: RGB;
+  tertiary: RGB;
 }
 
 interface PaletteData {
@@ -1528,19 +1991,11 @@ interface PaletteData {
   darkMode: RGB[];
   accessibleLight: RGB[];
   accessibleDark: RGB[];
+  monotoneScale: RGB[];
 }
 
 interface ColorScale {
-  '000': RGB;
-  '100': RGB;
-  '200': RGB;
-  '300': RGB;
-  '400': RGB;
-  '500': RGB;
-  '600': RGB;
-  '700': RGB;
-  '800': RGB;
-  '900': RGB;
+  [key: string]: RGB;
 }
 
 interface ColorHarmonies {
@@ -1557,6 +2012,25 @@ interface ImageNode {
   height: number;
   x: number;
   y: number;
+}
+
+interface ColorEstimation {
+  hueRange: [number, number];
+  saturationBias: number;
+  lightnessBias: number;
+  warmth: 'warm' | 'cool' | 'neutral';
+  vibrancy: 'high' | 'medium' | 'low';
+}
+
+interface HashAnalysis {
+  length: number;
+  sum: number;
+  average: number;
+  variance: number;
+  hexDigitCount: number;
+  patternScore: number;
+  alphaRatio: number;
+  digitRatio: number;
 }
 
 interface PaletteSettings {

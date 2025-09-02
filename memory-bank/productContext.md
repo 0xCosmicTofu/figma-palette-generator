@@ -1,28 +1,41 @@
 # Product Context - Figma Palette Generator
 
-## Why This Project Exists
-The current color palette creation workflow is fundamentally broken. Designers spend hours manually translating visual inspiration into systematic color systems, a process that is:
-- **Time-consuming**: Hours of manual color abstraction and testing
-- **Error-prone**: Human bias and fatigue lead to inconsistent results
-- **Repetitive**: Same process repeated for every project
-- **Inefficient**: Mental translation from visual to systematic is slow
+## Why This Project Exists (UPDATED POST-PIVOT)
 
-## Problems It Solves
-1. **Eliminates Manual Color Abstraction**: Automatically extracts colors from visual sources
-2. **Standardizes Color Generation**: Creates consistent 000-900 scales for all colors
-3. **Accelerates Workflow**: Reduces palette creation from hours to minutes
-4. **Ensures Consistency**: Systematic approach prevents design drift
-5. **Improves Accessibility**: Built-in WCAG compliance checking
-6. **Enhances Creativity**: Frees designers to focus on application rather than generation
+### Original Hypothesis (Disproven)
+The current color palette creation workflow could be automated by extracting colors from moodboard images.
 
-## How It Should Work
-### User Workflow
-1. **Setup**: User creates moodboard frame with bitmap images
-2. **Selection**: User selects the frame and runs the plugin
-3. **Processing**: Plugin analyzes images with size-based weighting
-4. **Generation**: Creates organized color scales and harmonies
-5. **Output**: Generates structured frames on canvas with auto-spacing
+### Critical Discovery
+**Figma API Limitation**: No pixel-level access to images means true color extraction is impossible. All attempts resulted in hash-based synthetic generation with poor results.
+
+### Actual Problem We Can Solve
+Designers still need faster, more systematic ways to create complete color systems, but the solution is:
+- **Generate from chosen primary**: User picks the color, system builds everything else
+- **Perfect color theory**: Focus on mathematically sound relationships
+- **Complete design systems**: 000-900 scales, light/dark modes, organized output
+- **Figma integration**: Direct creation of color styles and organized layouts
+
+## Problems It Actually Solves
+1. **Eliminates Manual Scale Creation**: Automatically generates 000-900 tint/shade scales
+2. **Provides Color Theory Expertise**: Creates proper secondary/tertiary relationships
+3. **Accelerates Design System Setup**: Complete color system in minutes, not hours
+4. **Ensures Consistency**: Mathematical approach prevents arbitrary color choices
+5. **Improves Organization**: Professional naming and layout in Figma
+6. **Enables Rapid Iteration**: Easy to regenerate with different primary colors
+
+## How It Should Work (UPDATED POST-PIVOT)
+### New User Workflow
+1. **Launch Plugin**: User opens the plugin in Figma
+2. **Select Primary**: User chooses primary color via color picker
+3. **Configure Options**: User selects scale steps, harmonies, accessibility settings
+4. **Generate**: Plugin creates complete color system using color theory
+5. **Output**: Generates organized frames with scales, harmonies, light/dark modes
 6. **Integration**: Colors automatically added to Figma color styles
+
+### Key Simplifications
+- **No image processing**: Eliminates unreliable hash-based generation
+- **User-controlled primary**: Designer makes the creative color choice
+- **Focus on systematization**: Plugin excels at the mathematical/organizational work
 
 ### User Experience Goals
 - **Intuitive**: Should feel like a natural extension of Figma
