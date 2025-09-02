@@ -1093,8 +1093,8 @@
         <div class="instructions">
             <h3>How to use:</h3>
             <ol>
-                <li>Select a rectangle with an image fill in Figma</li>
-                <li>Click "Extract Colors from Image" to analyze the image</li>
+                <li>Select one or more rectangles with image fills in Figma (max 10 for performance)</li>
+                <li>Click "Extract Colors from Image" to analyze the images</li>
                 <li>Select your primary, secondary, and tertiary colors from the extracted colors</li>
                 <li>Generate your complete design system</li>
             </ol>
@@ -1267,7 +1267,7 @@
         </div>
 
         <div class="actions">
-            <button class="btn btn-primary" id="generateBtn">Extract Colors from Image</button>
+            <button class="btn btn-primary" id="generateBtn">Extract Colors from Images</button>
             <button class="btn btn-secondary" id="cancelBtn">Cancel</button>
         </div>
 
@@ -1634,10 +1634,10 @@
         document.getElementById('generateBtn').addEventListener('click', () => {
             const btnText = document.getElementById('generateBtn').textContent;
             
-            if (btnText === 'Extract Colors from Image') {
+            if (btnText === 'Extract Colors from Images') {
                 // Extract colors from selected image
                 showProgress();
-                showStatus('Extracting colors from your image...', 'info');
+                showStatus('Extracting colors from your images...', 'info');
 
                 parent.postMessage({
                     pluginMessage: {
@@ -1716,8 +1716,10 @@
         window.addEventListener('message', (event) => {
             const message = event.data.pluginMessage;
             
-            if (message && message.type === 'image-bytes-received') {
-                handleImageBytesReceived(message.imageBytes, message.imageHash);
+            if (message && message.type === 'multi-image-selected') {
+                handleMultiImageSelected(message.imageCount, message.totalSelected);
+            } else if (message && message.type === 'image-bytes-received') {
+                handleImageBytesReceived(message.imageBytes, message.imageHash, message.multiImage, message.imageCount);
             } else if (message && message.type === 'palette-generated') {
                 hideProgress();
                 showStatus('Complete design system generated successfully!', 'success');
@@ -1728,9 +1730,23 @@
         });
 
         // Handle received image bytes for pixel analysis
-        function handleImageBytesReceived(imageBytes, imageHash) {
+        // Handle multi-image selection notification
+        function handleMultiImageSelected(imageCount, totalSelected) {
+            console.log(`Processing ${imageCount} valid images out of ${totalSelected} selected`);
+            
+            if (totalSelected > imageCount) {
+                showStatus(`Processing ${imageCount} valid images (${totalSelected - imageCount} invalid images skipped)`, 'info');
+            } else if (imageCount > 1) {
+                showStatus(`Processing ${imageCount} images for combined color palette`, 'info');
+            }
+        }
+
+        function handleImageBytesReceived(imageBytes, imageHash, multiImage = false, imageCount = 1) {
             console.log('Received image bytes:', imageBytes.length, 'bytes');
             console.log('Image hash:', imageHash);
+            if (multiImage) {
+                console.log(`Multi-image mode: processing ${imageCount} images`);
+            }
             
             // Convert array back to Uint8Array
             const uint8Array = new Uint8Array(imageBytes);

@@ -50,50 +50,92 @@ figma.ui.onmessage = async (msg: PluginMessage): Promise<void> => {
  */
 async function extractImageColors(): Promise<void> {
   try {
-    console.log('Extracting colors from selected image...');
+    const selectedNodes = figma.currentPage.selection;
+    console.log('Extracting colors from selected images...', selectedNodes.length, 'images selected');
 
-    const selectedNode = figma.currentPage.selection[0];
+    if (selectedNodes.length === 0) {
+      figma.notify('Please select at least one image first', { error: true });
+      figma.ui.postMessage({ type: 'error', message: 'No images selected' });
+      return;
+    }
+
+    // Limit to reasonable number of images for performance
+    const maxImages = 10;
+    const imagesToProcess = selectedNodes.slice(0, maxImages);
     
-    if (!selectedNode) {
-      figma.notify('Please select an image first', { error: true });
-      figma.ui.postMessage({ type: 'error', message: 'No image selected' });
+    if (selectedNodes.length > maxImages) {
+      figma.notify(`Processing first ${maxImages} images (max limit for performance)`, { error: false });
+    }
+
+    // Validate all selected images
+    const validImages: RectangleNode[] = [];
+    for (let i = 0; i < imagesToProcess.length; i++) {
+      const node = imagesToProcess[i];
+      
+      if (!node) {
+        console.warn(`Skipping node ${i}: undefined node`);
+        continue;
+      }
+      
+      // Check if it's a valid image node
+      if (node.type !== 'RECTANGLE' || !node.fills || !Array.isArray(node.fills) || node.fills.length === 0) {
+        console.warn(`Skipping node ${i}: not a valid rectangle with fills`);
+        continue;
+      }
+
+      const imageFill = (node.fills as Paint[]).find((fill: Paint) => fill.type === 'IMAGE') as ImagePaint;
+      if (!imageFill || !imageFill.imageHash) {
+        console.warn(`Skipping node ${i}: no image fill found`);
+        continue;
+      }
+
+      // Get the image object
+      const image = figma.getImageByHash(imageFill.imageHash);
+      if (!image) {
+        console.warn(`Skipping node ${i}: could not load image data`);
+        continue;
+      }
+
+      validImages.push(node);
+    }
+
+    if (validImages.length === 0) {
+      figma.notify('No valid images found in selection. Please select rectangles with image fills.', { error: true });
+      figma.ui.postMessage({ type: 'error', message: 'No valid images found' });
       return;
     }
 
-    // Check if it's a valid image node
-    if (selectedNode.type !== 'RECTANGLE' || !selectedNode.fills || !Array.isArray(selectedNode.fills) || selectedNode.fills.length === 0) {
-      figma.notify('Please select a rectangle with an image fill', { error: true });
-      figma.ui.postMessage({ type: 'error', message: 'Invalid image selection' });
-      return;
-    }
+    console.log(`Processing ${validImages.length} valid images out of ${selectedNodes.length} selected`);
 
-    const imageFill = selectedNode.fills.find(fill => fill.type === 'IMAGE') as ImagePaint;
-    if (!imageFill || !imageFill.imageHash) {
-      figma.notify('Selected rectangle does not contain an image', { error: true });
-      figma.ui.postMessage({ type: 'error', message: 'No image found in selection' });
-      return;
-    }
-
-    // Get the image object and extract bytes
-    const image = figma.getImageByHash(imageFill.imageHash);
-    if (!image) {
-      figma.notify('Could not load image data', { error: true });
-      figma.ui.postMessage({ type: 'error', message: 'Failed to load image' });
-      return;
-    }
-
-    // Get the raw image bytes
-    const imageBytes = await image.getBytesAsync();
-    console.log('Image bytes extracted:', imageBytes.length, 'bytes');
-
-    // Send image bytes to UI for pixel analysis
-    figma.ui.postMessage({
-      type: 'image-bytes-received',
-      imageBytes: Array.from(imageBytes), // Convert Uint8Array to regular array for transfer
-      imageHash: imageFill.imageHash
+    // Send image data to UI for processing
+    figma.ui.postMessage({ 
+      type: 'multi-image-selected', 
+      imageCount: validImages.length,
+      totalSelected: selectedNodes.length
     });
-    
-    console.log('Image bytes sent to UI for processing');
+
+    // Process the first image for UI display (we'll enhance this later)
+    const firstImage = validImages[0];
+    if (firstImage) {
+      const firstImageFill = (firstImage.fills as Paint[]).find((fill: Paint) => fill.type === 'IMAGE') as ImagePaint;
+      if (firstImageFill && firstImageFill.imageHash) {
+        const firstImageObj = figma.getImageByHash(firstImageFill.imageHash);
+        
+        if (firstImageObj) {
+          const imageBytes = await firstImageObj.getBytesAsync();
+          console.log('First image bytes extracted:', imageBytes.length, 'bytes');
+          
+          // Send first image bytes to UI for color extraction
+          figma.ui.postMessage({
+            type: 'image-bytes-received',
+            imageBytes: Array.from(imageBytes), // Convert Uint8Array to regular array for transfer
+            imageHash: firstImageFill.imageHash,
+            multiImage: true,
+            imageCount: validImages.length
+          });
+        }
+      }
+    }
     
   } catch (error) {
     console.error('Error extracting image colors:', error);
@@ -103,7 +145,7 @@ async function extractImageColors(): Promise<void> {
       message: error instanceof Error ? error.message : 'Failed to extract image colors' 
     });
     
-    figma.notify('Failed to extract colors from image', { error: true });
+    figma.notify('Failed to extract colors from images', { error: true });
   }
 }
 
