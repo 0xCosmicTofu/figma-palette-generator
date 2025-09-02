@@ -1012,11 +1012,30 @@
             transform: scale(1.1);
         }
         
-        .reset-hint {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.7);
-            margin-top: 8px;
-            font-style: italic;
+        .btn-clear-all {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-clear-all:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+        }
+        
+        .btn-clear-all:active {
+            transform: translateY(0);
         }
         
         .selected-colors span {
@@ -1190,7 +1209,8 @@
             </div>
         </div>
 
-        <div class="settings">
+        <div class="settings" id="settings-section" style="display: none;">
+            <h3>Palette Settings</h3>
             <div class="setting-group">
                 <label>Color Scale Steps:</label>
                 <div class="radio-group">
@@ -2328,12 +2348,7 @@
                 return; // Prevent duplicate selection
             }
             
-            // Remove previous selections for this step
-            document.querySelectorAll('.extracted-color').forEach(div => {
-                div.classList.remove('selected', 'primary', 'secondary', 'tertiary');
-            });
-            
-            // Mark this color as selected
+            // Mark this color as selected for the current step
             colorDiv.classList.add('selected');
             
             if (step === 1) {
@@ -2353,9 +2368,10 @@
             updateSelectionStatus();
             updateProgressSteps();
             
-            // If all colors selected, enable generation
+            // If all colors selected, enable generation and show harmony options
             if (window.currentSelectionStep === 4) {
                 enablePaletteGeneration();
+                showHarmonyOptions();
             }
         }
 
@@ -2373,22 +2389,18 @@
             } else if (step === 4) {
                 const selectedColorsHtml = Object.entries(window.selectedColors)
                     .filter(([key, value]) => value !== null)
-                    .map(([key, value]) => `
-                        <div class="selected-color-item">
-                            <span class="${key}">${key.charAt(0).toUpperCase() + key.slice(1)}</span>
-                            <button class="btn-reset" onclick="resetColorSelection('${key}')" title="Reset ${key} color">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M3 12a9 9 0 1 1 9 9M3 12h9m-9 0l3-3m3 3l-3-3"/>
-                                </svg>
-                            </button>
-                        </div>
-                    `)
+                    .map(([key, value]) => `<span class="${key}">${key.charAt(0).toUpperCase() + key.slice(1)}</span>`)
                     .join('');
                 
                 statusDiv.innerHTML = `
                     <p>All colors selected! Ready to generate palette.</p>
                     <div class="selected-colors">${selectedColorsHtml}</div>
-                    <p class="reset-hint">Click the reset button (↻) next to any color to change it</p>
+                    <button class="btn-clear-all" onclick="clearAllSelections()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14z"/>
+                        </svg>
+                        Clear All Selections
+                    </button>
                 `;
             }
         }
@@ -2421,32 +2433,47 @@
             };
         }
 
-        // Reset individual color selection
-        function resetColorSelection(colorType) {
-            console.log(`Resetting ${colorType} color selection`);
+        // Show harmony options after all colors are selected
+        function showHarmonyOptions() {
+            console.log('Showing harmony options');
+            const settingsSection = document.getElementById('settings-section');
+            if (settingsSection) {
+                settingsSection.style.display = 'block';
+                // Scroll to settings section
+                settingsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // Clear all color selections and reset to beginning
+        function clearAllSelections() {
+            console.log('Clearing all color selections');
             
-            // Clear the selected color
-            window.selectedColors[colorType] = null;
+            // Clear all selected colors from memory
+            window.selectedColors = {
+                primary: null,
+                secondary: null,
+                tertiary: null
+            };
             
-            // Remove visual indicators from the color swatch
+            // Remove ALL visual indicators from color swatches
             document.querySelectorAll('.extracted-color').forEach(div => {
-                div.classList.remove(colorType);
+                div.classList.remove('selected', 'primary', 'secondary', 'tertiary');
             });
             
-            // Reset to the step where this color was selected
-            if (colorType === 'primary') {
-                window.currentSelectionStep = 1;
-            } else if (colorType === 'secondary') {
-                window.currentSelectionStep = 2;
-            } else if (colorType === 'tertiary') {
-                window.currentSelectionStep = 3;
+            // Reset to the beginning
+            window.currentSelectionStep = 1;
+            
+            // Hide settings section
+            const settingsSection = document.getElementById('settings-section');
+            if (settingsSection) {
+                settingsSection.style.display = 'none';
             }
             
             // Update UI
             updateSelectionStatus();
             updateProgressSteps();
             
-            // Disable generation button since not all colors are selected
+            // Disable generation button
             const generateBtn = document.getElementById('generateBtn');
             generateBtn.textContent = 'Select All Colors First';
             generateBtn.disabled = true;
