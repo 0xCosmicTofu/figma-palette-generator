@@ -18,6 +18,16 @@
             line-height: 1.5;
         }
 
+        /* Hide scrollbars for all elements */
+        * {
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+
+        *::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+
         .container {
             padding: 24px;
             max-width: 100%;
@@ -908,23 +918,40 @@
             font-weight: 600;
         }
 
-        .extracted-colors {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
         .extracted-color {
-            aspect-ratio: 1;
-            border-radius: 8px;
-            border: 2px solid #2a2a2a;
+            width: 74px;
+            height: 74px;
+            border-radius: 4px;
+            border: 1px solid #444444;
             cursor: pointer;
             transition: all 0.2s ease;
             position: relative;
             overflow: hidden;
             background: #1a1a1a;
         }
+
+        .extracted-color.selected::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 36px;
+            height: 36px;
+            background: white;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Andale Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+            font-size: 18px;
+            color: black;
+            font-weight: normal;
+        }
+
+        .extracted-color.primary::after { content: '1'; }
+        .extracted-color.secondary::after { content: '2'; }
+        .extracted-color.tertiary::after { content: '3'; }
 
         .extracted-color:hover {
             border-color: #3a3a3a;
@@ -1097,37 +1124,91 @@
             </ol>
         </div>
 
-        <!-- Color Selection Section -->
-        <div id="color-selection-section" class="section" style="display: none;">
-            <h3>Select Your Colours</h3>
-            <div id="selection-progress" class="selection-progress">
-                <div class="progress-step active" data-step="1">
-                    <span class="step-number">1</span>
-                    <span class="step-label">Primary</span>
+        <!-- Colour Selection Section -->
+        <div id="color-selection-section" style="display: none;">
+            <!-- Swatch Selection Card -->
+            <div class="instructions" style="margin-bottom: 32px;">
+                <div style="font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 8px;">SELECT YOUR COLOURS</div>
+                <div style="font-size: 14px; color: #ffffff; margin-bottom: 16px;">Select the swatch in the order of primary, secondary and tertiary.</div>
+                
+                <!-- Swatch Grid -->
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(2, 1fr); gap: 8px; height: 156px; margin-bottom: 16px;" id="extracted-colors">
+                    <!-- Colors will be populated here -->
                 </div>
-                <div class="progress-step" data-step="2">
-                    <span class="step-number">2</span>
-                    <span class="step-label">Secondary</span>
-                </div>
-                <div class="progress-step" data-step="3">
-                    <span class="step-number">3</span>
-                    <span class="step-label">Tertiary</span>
+                
+                <!-- Clear Selections Button -->
+                <div id="clear-selections-container" style="display: none;">
+                    <button style="background: rgba(255,255,255,0.1); color: white; border: none; border-radius: 4px; padding: 12px 0; width: 100%; font-family: 'Andale Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; font-size: 16px;" onclick="clearAllSelections()">
+                        Clear Selections
+                    </button>
                 </div>
             </div>
             
-            <div id="extracted-colors" class="extracted-colors">
-                <!-- Colors will be populated here -->
+            <!-- WCAG Accessibility Card -->
+            <div id="wcag-card" class="instructions" style="display: none; margin-bottom: 32px;">
+                <div style="font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 8px;">WCAG ACCESSIBILITY</div>
+                <div style="font-size: 14px; color: #ffffff;">Select the desired colour scale depth</div>
             </div>
             
-            <div id="selection-status" class="selection-status">
-                <p>Click on a colour to select it as your primary colour</p>
+            <!-- Palette Settings Card -->
+            <div id="palette-settings-card" class="instructions" style="display: none; margin-bottom: 32px;">
+                <div style="font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 8px;">PALETTE SETTINGS</div>
+                <div style="font-size: 14px; color: #ffffff; margin-bottom: 16px;">Select the desired colour scale depth</div>
+                
+                <!-- Radio Options -->
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border: 1px solid #444444; border-radius: 4px; cursor: pointer; user-select: none; -webkit-user-select: none;" onclick="selectPaletteSteps(5, this)">
+                        <span style="font-size: 14px; color: #ffffff;">5 steps</span>
+                        <div style="width: 14px; height: 14px; border: 1px solid #444444; border-radius: 7px;" class="radio-button"></div>
+                    </label>
+                    <label style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border: 1px solid #69d128; border-radius: 4px; cursor: pointer; user-select: none; -webkit-user-select: none;" onclick="selectPaletteSteps(9, this)" class="selected">
+                        <span style="font-size: 14px; color: #ffffff;">9 steps</span>
+                        <div style="width: 14px; height: 14px; border: 1px solid #444444; border-radius: 7px; position: relative;" class="radio-button">
+                            <div style="width: 6px; height: 6px; background: #69d128; border-radius: 3px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" class="radio-dot"></div>
+                        </div>
+                    </label>
+                    <label style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border: 1px solid #444444; border-radius: 4px; cursor: pointer; user-select: none; -webkit-user-select: none;" onclick="selectPaletteSteps(13, this)">
+                        <span style="font-size: 14px; color: #ffffff;">13 steps</span>
+                        <div style="width: 14px; height: 14px; border: 1px solid #444444; border-radius: 7px;" class="radio-button"></div>
+                    </label>
+                </div>
+            </div>
+            
+            <!-- Harmony Types Card -->
+            <div id="harmony-types-card" class="instructions" style="display: none; margin-bottom: 32px;">
+                <div style="font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 8px;">HARMONY TYPES</div>
+                <div style="font-size: 14px; color: #ffffff; margin-bottom: 16px;">Select any colour harmonies</div>
+                
+                <!-- Checkbox Options -->
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border: 1px solid #69d128; border-radius: 4px; cursor: pointer; user-select: none; -webkit-user-select: none;" onclick="toggleHarmonyType('analogous', this)" class="checked">
+                        <span style="font-size: 14px; color: #ffffff;">Analogous colours</span>
+                        <div style="width: 14px; height: 14px; border: 1px solid #444444; border-radius: 2px; position: relative;" class="checkbox">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" style="position: absolute; top: -1px; left: -1px;">
+                                <path d="M4.51953 7.62044L6.37891 9.47982L9.47786 4.52148" stroke="#69D128" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                    </label>
+                    <label style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border: 1px solid #444444; border-radius: 4px; cursor: pointer; user-select: none; -webkit-user-select: none;" onclick="toggleHarmonyType('complementary', this)">
+                        <span style="font-size: 14px; color: #ffffff;">Complementary colours</span>
+                        <div style="width: 14px; height: 14px; border: 1px solid #444444; border-radius: 2px;" class="checkbox"></div>
+                    </label>
+                    <label style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border: 1px solid #444444; border-radius: 4px; cursor: pointer; user-select: none; -webkit-user-select: none;" onclick="toggleHarmonyType('triadic', this)">
+                        <span style="font-size: 14px; color: #ffffff;">Triadic colours</span>
+                        <div style="width: 14px; height: 14px; border: 1px solid #444444; border-radius: 2px;" class="checkbox"></div>
+                    </label>
+                    <label style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border: 1px solid #444444; border-radius: 4px; cursor: pointer; user-select: none; -webkit-user-select: none;" onclick="toggleHarmonyType('splitComplementary', this)">
+                        <span style="font-size: 14px; color: #ffffff;">Split-complementary colours</span>
+                        <div style="width: 14px; height: 14px; border: 1px solid #444444; border-radius: 2px;" class="checkbox"></div>
+                    </label>
+                </div>
             </div>
         </div>
 
         <div class="color-picker-section" style="display: none;">
             <div class="setting-group">
-                <label>Select Your Brand Colors</label>
-                <p style="font-size: 12px; color: #666; margin-bottom: 16px;">Pick colors in order: Primary (1) → Secondary (2) → Tertiary (3)</p>
+                <label>Select Your Brand Colours</label>
+                <p style="font-size: 12px; color: #666; margin-bottom: 16px;">Pick colours in order: Primary (1) → Secondary (2) → Tertiary (3)</p>
                 
                 <!-- Current Selection Status -->
                 <div class="selection-progress" id="selectionProgress">
@@ -1154,19 +1235,19 @@
                     </div>
                 </div>
 
-                <!-- Color Picker Interface -->
+                <!-- Colour Picker Interface -->
                 <div class="color-picker-interface">
-                    <!-- Quick Preset Colors -->
+                    <!-- Quick Preset Colours -->
                     <div class="preset-colors">
                         <label>Quick Presets:</label>
                         <div class="preset-grid" id="presetGrid">
-                            <!-- Vibrant colors similar to anime image -->
+                            <!-- Vibrant colours similar to anime image -->
                         </div>
                     </div>
 
                     <!-- Advanced HSL Picker -->
                     <div class="advanced-picker">
-                        <label>Custom Color Picker:</label>
+                        <label>Custom Colour Picker:</label>
                         <div class="hsl-controls">
                             <div class="control-group">
                                 <label for="hueSlider">Hue</label>
@@ -1185,19 +1266,19 @@
                             </div>
                         </div>
                         
-                        <!-- Color Preview and Selection -->
+                        <!-- Colour Preview and Selection -->
                         <div class="color-preview-area">
                             <div class="color-preview" id="colorPreview"></div>
                             <div class="color-info">
                                 <div class="hex-value" id="hexValue">#808080</div>
-                                <button class="btn btn-select" id="selectColorBtn">Select This Color</button>
+                                <button class="btn btn-select" id="selectColorBtn">Select This Colour</button>
                             </div>
                         </div>
                     </div>
 
                     <!-- Harmony Suggestions -->
                     <div class="harmony-suggestions" id="harmonySuggestions" style="display: none;">
-                        <label>Suggested Colors Based on Your Primary:</label>
+                        <label>Suggested Colours Based on Your Primary:</label>
                         <div class="harmony-colors" id="harmonyColors">
                             <!-- Auto-generated harmony suggestions -->
                         </div>
@@ -1209,7 +1290,7 @@
         <div class="settings" id="settings-section" style="display: none;">
             <h3>Palette Settings</h3>
             <div class="setting-group">
-                <label>Color Scale Steps:</label>
+                <label>Colour Scale Steps:</label>
                 <div class="radio-group">
                     <div class="radio-item">
                         <input type="radio" id="scale5" name="scaleSteps" value="5">
@@ -1242,38 +1323,38 @@
                     <label class="checkbox-item">
                         <input type="checkbox" id="analogous" value="analogous" checked>
                         <span class="checkmark"></span>
-                        Analogous Colors
+                        Analogous Colours
                     </label>
                     <label class="checkbox-item">
                         <input type="checkbox" id="complementary" value="complementary" checked>
                         <span class="checkmark"></span>
-                        Complementary Colors
+                        Complementary Colours
                     </label>
                     <label class="checkbox-item">
                         <input type="checkbox" id="triadic" value="triadic" checked>
                         <span class="checkmark"></span>
-                        Triadic Colors
+                        Triadic Colours
                     </label>
                     <label class="checkbox-item">
                         <input type="checkbox" id="splitComplementary" value="splitComplementary" checked>
                         <span class="checkmark"></span>
-                        Split-Complementary Colors
+                        Split-Complementary Colours
                     </label>
-                </div>
+            </div>
+        </div>
+        </div>
+
+        <!-- Notification card for extracting state -->
+        <div id="notification-card" class="instructions" style="display: none;">
+            <div style="font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 8px;">Extracting colours...</div>
+            <div style="background: #1b1b1b; height: 6px; border-radius: 3px; overflow: hidden; width: 100%;">
+                <div id="progress-bar-fill" style="background: #69d128; height: 6px; border-radius: 3px; width: 0%; transition: width 0.3s;"></div>
             </div>
         </div>
 
         <div class="actions">
             <button class="btn btn-primary" id="generateBtn">Extract Colours</button>
             <button class="btn btn-secondary" id="cancelBtn">Cancel</button>
-        </div>
-
-        <div class="status" id="status"></div>
-
-        <div class="progress" id="progress">
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill"></div>
-            </div>
         </div>
     </div>
 
@@ -1328,7 +1409,7 @@
             primarySelection.style.display = 'block';
             document.getElementById('generateBtn').textContent = 'Generate Palette';
             document.getElementById('generateBtn').disabled = false;
-            showStatus('Choose your primary color from the options above.', 'info');
+            showStatus('Choose your primary colour from the options above.', 'info');
         }
         
         function selectPrimary(index, color) {
@@ -1339,7 +1420,7 @@
             document.querySelector(`[data-index="${index}"]`).classList.add('selected');
             
             selectedPrimary = color;
-            showStatus(`Primary color selected! Click "Generate Palette" to continue.`, 'success');
+            showStatus(`Primary colour selected! Click "Generate Palette" to continue.`, 'success');
         }
         
         function openColorPicker() {
@@ -1366,7 +1447,7 @@
                 swatch.style.animation = 'none';
                 
                 selectedPrimary = color;
-                showStatus(`Custom primary color selected! Click "Generate Palette" to continue.`, 'success');
+                showStatus(`Custom primary colour selected! Click "Generate Palette" to continue.`, 'success');
                 
                 document.body.removeChild(colorInput);
             });
@@ -1540,14 +1621,14 @@
             if (currentStep === 'primary') {
                 currentStep = 'secondary';
                 showHarmonySuggestions(rgb);
-                showStatus('Great! Now select your Secondary color.', 'info');
+                showStatus('Great! Now select your Secondary colour.', 'info');
             } else if (currentStep === 'secondary') {
                 currentStep = 'tertiary';
-                showStatus('Perfect! Finally, select your Tertiary color.', 'info');
+                showStatus('Perfect! Finally, select your Tertiary colour.', 'info');
             } else if (currentStep === 'tertiary') {
                 currentStep = 'complete';
                 enableGeneration();
-                showStatus('All colors selected! Ready to generate your design system.', 'success');
+                showStatus('All colours selected! Ready to generate your design system.', 'success');
             }
             
             updateActiveStep();
@@ -1624,7 +1705,7 @@
         function enableGeneration() {
             const generateBtn = document.getElementById('generateBtn');
             generateBtn.disabled = false;
-            generateBtn.textContent = 'Generate Design System';
+            generateBtn.textContent = 'Generate Palette';
         }
 
                 // Generate button handler
@@ -1633,8 +1714,7 @@
             
             if (btnText === 'Extract Colours') {
                 // Extract colors from selected image
-                showProgress();
-                showStatus('Extracting colours (Max 10 images)', 'info');
+                showExtractingNotification();
 
                 parent.postMessage({
                     pluginMessage: {
@@ -1642,10 +1722,10 @@
                     }
                 }, '*');
                 
-            } else if (btnText === 'Generate Design System') {
+            } else if (btnText === 'Generate Palette') {
                 // Generate complete palette from selected colors
                 if (!selectedColors.primary || !selectedColors.secondary || !selectedColors.tertiary) {
-                    showStatus('Please select all three colors first.', 'error');
+                    showStatus('Please select all three colours first.', 'error');
                     return;
                 }
 
@@ -1677,36 +1757,31 @@
         });
 
         // Utility functions
-        function showStatus(message, type) {
-            const status = document.getElementById('status');
-            status.textContent = message;
-            status.className = `status ${type}`;
-            status.style.display = 'block';
-        }
-
-        function showProgress() {
-            const progress = document.getElementById('progress');
-            progress.style.display = 'block';
+        function showExtractingNotification() {
+            const notificationCard = document.getElementById('notification-card');
+            notificationCard.style.display = 'block';
             
-            // Simulate progress
-            let width = 0;
-            const progressFill = document.getElementById('progressFill');
-            const interval = setInterval(() => {
-                width += Math.random() * 15;
-                if (width >= 100) {
-                    width = 100;
-                    clearInterval(interval);
-                }
-                progressFill.style.width = width + '%';
-            }, 200);
+            // Reset progress bar
+            const progressFill = document.getElementById('progress-bar-fill');
+            progressFill.style.width = '0%';
         }
 
-        function hideProgress() {
-            const progress = document.getElementById('progress');
-            progress.style.display = 'none';
+        function updateProgress(percentage) {
+            const progressFill = document.getElementById('progress-bar-fill');
+            progressFill.style.width = percentage + '%';
+        }
+
+        function hideExtractingNotification() {
+            const notificationCard = document.getElementById('notification-card');
+            notificationCard.style.display = 'none';
             // Reset progress bar
-            const progressFill = document.getElementById('progressFill');
+            const progressFill = document.getElementById('progress-bar-fill');
             progressFill.style.width = '0%';
+        }
+
+        function showStatus(message, type) {
+            // For backwards compatibility - will be removed once all states are updated
+            console.log(`Status: ${message} (${type})`);
         }
 
         // Listen for messages from the plugin
@@ -1718,11 +1793,11 @@
             } else if (message && message.type === 'image-bytes-received') {
                 handleImageBytesReceived(message.imageBytes, message.imageHash, message.multiImage, message.imageCount);
             } else if (message && message.type === 'palette-generated') {
-                hideProgress();
-                showStatus('Complete design system generated successfully!', 'success');
+                hideExtractingNotification();
+                console.log('Complete design system generated successfully!');
             } else if (message && message.type === 'error') {
-                hideProgress();
-                showStatus(message.message || 'An error occurred', 'error');
+                hideExtractingNotification();
+                console.log('Error:', message.message || 'An error occurred');
             }
         });
 
@@ -1751,27 +1826,42 @@
             const img = new Image();
             img.onload = () => {
                 console.log('Image loaded successfully:', img.width, 'x', img.height);
+                updateProgress(20);
                 
-                // Process image with canvas for pixel analysis
-                const extractedColors = analyzeImagePixels(img);
-                console.log('Extracted colors:', extractedColors);
-                
-                // Apply median cut algorithm to get more diverse colors
-                const dominantColors = medianCutAlgorithm(extractedColors, 8); // Get 8 colors for better diversity
-                console.log('Dominant colors after median cut:', dominantColors);
-                
-                // Analyze and rank colors for primary selection
-                const primaryCandidates = analyzePrimaryCandidates(dominantColors);
-                console.log('Primary color candidates:', primaryCandidates);
-                
-                // Generate hybrid secondary/tertiary colors
-                const hybridPalette = generateHybridPalette(primaryCandidates, dominantColors);
-                console.log('Hybrid palette generated:', hybridPalette);
-                
-                // Show extracted colors in UI for user selection
-                displayExtractedColors(primaryCandidates, dominantColors);
-                
-                URL.revokeObjectURL(url);
+                setTimeout(() => {
+                    // Process image with canvas for pixel analysis
+                    const extractedColors = analyzeImagePixels(img);
+                    console.log('Extracted colors:', extractedColors);
+                    updateProgress(40);
+                    
+                    setTimeout(() => {
+                        // Apply median cut algorithm to get more diverse colors
+                        const dominantColors = medianCutAlgorithm(extractedColors, 8);
+                        console.log('Dominant colors after median cut:', dominantColors);
+                        updateProgress(65);
+                        
+                        setTimeout(() => {
+                            // Analyze and rank colors for primary selection
+                            const primaryCandidates = analyzePrimaryCandidates(dominantColors);
+                            console.log('Primary color candidates:', primaryCandidates);
+                            updateProgress(85);
+                            
+                            setTimeout(() => {
+                                // Generate hybrid secondary/tertiary colors
+                                const hybridPalette = generateHybridPalette(primaryCandidates, dominantColors);
+                                console.log('Hybrid palette generated:', hybridPalette);
+                                updateProgress(100);
+                                
+                                setTimeout(() => {
+                                    // Hide extracting notification and show extracted colors
+                                    hideExtractingNotification();
+                                    displayExtractedColors(primaryCandidates, dominantColors);
+                                    URL.revokeObjectURL(url);
+                                }, 100);
+                            }, 50);
+                        }, 50);
+                    }, 50);
+                }, 50);
             };
             img.onerror = () => {
                 console.error('Failed to load image from bytes');
@@ -2323,6 +2413,7 @@
                     colorDiv.dataset.color = JSON.stringify(candidate.color);
                     colorDiv.addEventListener('click', () => selectExtractedColor(candidate, i));
                 } else {
+                    colorDiv.style.backgroundColor = '#2a2a2a';
                     colorDiv.classList.add('placeholder');
                 }
                 extractedColorsContainer.appendChild(colorDiv);
@@ -2331,7 +2422,6 @@
             // Reset selection state
             window.selectedColors = { primary: null, secondary: null, tertiary: null };
             window.currentSelectionStep = 1;
-            updateSelectionStatus();
         }
 
         // Handle color selection
@@ -2371,13 +2461,14 @@
                 window.currentSelectionStep = 4; // All selected
             }
             
-            updateSelectionStatus();
-            updateProgressSteps();
-            
-            // If all colors selected, enable generation and show harmony options
+            // If all colors selected, show additional cards and enable generation
             if (window.currentSelectionStep === 4) {
+                console.log('All 3 colors selected! Showing additional options...');
+                showClearButton();
+                showAdditionalCards();
                 enablePaletteGeneration();
-                showHarmonyOptions();
+            } else {
+                console.log(`Color ${step} selected. Current step: ${window.currentSelectionStep}`);
             }
         }
 
@@ -2399,7 +2490,7 @@
                     .join('');
                 
                 statusDiv.innerHTML = `
-                    <p>All colors selected! Ready to generate palette.</p>
+                    <p>All colours selected! Ready to generate palette.</p>
                     <div class="selected-colors">${selectedColorsHtml}</div>
                     <button class="btn-clear-all" onclick="clearAllSelections()">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -2428,7 +2519,7 @@
             });
         }
 
-        // Enable palette generation when all colors are selected
+        // Enable palette generation when all colours are selected
         function enablePaletteGeneration() {
             const generateBtn = document.getElementById('generateBtn');
             generateBtn.textContent = 'Generate Palette';
@@ -2439,15 +2530,101 @@
             };
         }
 
-        // Show harmony options after all colors are selected
-        function showHarmonyOptions() {
-            console.log('Showing harmony options');
-            const settingsSection = document.getElementById('settings-section');
-            if (settingsSection) {
-                settingsSection.style.display = 'block';
-                // Scroll to settings section
-                settingsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Show clear selections button
+        function showClearButton() {
+            const clearContainer = document.getElementById('clear-selections-container');
+            clearContainer.style.display = 'block';
+        }
+
+        // Show additional cards when all colors are selected
+        function showAdditionalCards() {
+            document.getElementById('wcag-card').style.display = 'block';
+            document.getElementById('palette-settings-card').style.display = 'block';
+            document.getElementById('harmony-types-card').style.display = 'block';
+        }
+
+        // Global settings
+        window.paletteSettings = {
+            scaleSteps: 9,
+            harmonyTypes: ['analogous']
+        };
+
+        // Handle palette steps selection
+        function selectPaletteSteps(steps, element) {
+            // Remove selected state from all radio options
+            document.querySelectorAll('#palette-settings-card label').forEach(label => {
+                label.classList.remove('selected');
+                label.style.borderColor = '#444444';
+                const radioDot = label.querySelector('.radio-dot');
+                if (radioDot) radioDot.remove();
+            });
+
+            // Add selected state to clicked option
+            element.classList.add('selected');
+            element.style.borderColor = '#69d128';
+            
+            // Add radio dot
+            const radioButton = element.querySelector('.radio-button');
+            const radioDot = document.createElement('div');
+            radioDot.className = 'radio-dot';
+            radioDot.style.cssText = 'width: 6px; height: 6px; background: #69d128; border-radius: 3px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);';
+            radioButton.style.position = 'relative';
+            radioButton.appendChild(radioDot);
+
+            // Update settings
+            window.paletteSettings.scaleSteps = steps;
+            console.log('Palette steps selected:', steps);
+        }
+
+        // Handle harmony type toggle
+        function toggleHarmonyType(type, element) {
+            const isChecked = element.classList.contains('checked');
+            
+            if (isChecked) {
+                // Uncheck
+                element.classList.remove('checked');
+                element.style.borderColor = '#444444';
+                const checkmark = element.querySelector('.checkbox svg');
+                if (checkmark) checkmark.remove();
+                
+                // Remove from settings
+                const index = window.paletteSettings.harmonyTypes.indexOf(type);
+                if (index > -1) {
+                    window.paletteSettings.harmonyTypes.splice(index, 1);
+                }
+            } else {
+                // Check
+                element.classList.add('checked');
+                element.style.borderColor = '#69d128';
+                
+                // Add checkmark SVG
+                const checkbox = element.querySelector('.checkbox');
+                const checkmark = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                checkmark.setAttribute('width', '14');
+                checkmark.setAttribute('height', '14');
+                checkmark.setAttribute('viewBox', '0 0 14 14');
+                checkmark.setAttribute('fill', 'none');
+                checkmark.className = 'checkmark';
+                checkmark.style.cssText = 'position: absolute; top: -1px; left: -1px;';
+                
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', 'M4.51953 7.62044L6.37891 9.47982L9.47786 4.52148');
+                path.setAttribute('stroke', '#69D128');
+                path.setAttribute('stroke-width', '1.5');
+                path.setAttribute('stroke-linecap', 'round');
+                path.setAttribute('stroke-linejoin', 'round');
+                
+                checkmark.appendChild(path);
+                checkbox.style.position = 'relative';
+                checkbox.appendChild(checkmark);
+                
+                // Add to settings
+                if (!window.paletteSettings.harmonyTypes.includes(type)) {
+                    window.paletteSettings.harmonyTypes.push(type);
+                }
             }
+            
+            console.log('Harmony types selected:', window.paletteSettings.harmonyTypes);
         }
 
         // Clear all color selections and reset to beginning
@@ -2469,20 +2646,16 @@
             // Reset to the beginning
             window.currentSelectionStep = 1;
             
-            // Hide settings section
-            const settingsSection = document.getElementById('settings-section');
-            if (settingsSection) {
-                settingsSection.style.display = 'none';
-            }
+            // Hide additional cards and clear button
+            document.getElementById('clear-selections-container').style.display = 'none';
+            document.getElementById('wcag-card').style.display = 'none';
+            document.getElementById('palette-settings-card').style.display = 'none';
+            document.getElementById('harmony-types-card').style.display = 'none';
             
-            // Update UI
-            updateSelectionStatus();
-            updateProgressSteps();
-            
-            // Disable generation button
+            // Reset generation button
             const generateBtn = document.getElementById('generateBtn');
-            generateBtn.textContent = 'Select All Colors First';
-            generateBtn.disabled = true;
+            generateBtn.textContent = 'Extract Colours';
+            generateBtn.disabled = false;
             generateBtn.onclick = null;
         }
 

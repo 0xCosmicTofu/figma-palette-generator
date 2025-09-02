@@ -1293,13 +1293,18 @@ async function createPaletteFrames(palette: PaletteData, settings: PaletteSettin
     console.log('Starting palette frame creation...');
     
     // Load fonts first (required for text nodes)
-    await figma.loadFontAsync({ family: "Inter", style: "Regular" });
-    console.log('Fonts loaded successfully');
+    try {
+      await figma.loadFontAsync({ family: "Andale Mono", style: "Regular" });
+      console.log('Andale Mono font loaded successfully');
+    } catch (error) {
+      console.warn('Andale Mono font not available, falling back to Inter');
+      await figma.loadFontAsync({ family: "Inter", style: "Regular" });
+    }
     
     // Create main container frame
     const mainFrame = figma.createFrame();
     mainFrame.name = "Generated Color Palette";
-    mainFrame.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
+    mainFrame.fills = [{ type: 'SOLID', color: { r: 0.105, g: 0.105, b: 0.105 } }]; // #1b1b1b
     
     // Enable Auto Layout for automatic positioning
     mainFrame.layoutMode = "VERTICAL";
@@ -1387,7 +1392,8 @@ async function createColorScales(parentFrame: FrameNode, palette: PaletteData, s
       const title = figma.createText();
       title.characters = scaleNames[i] || 'Unknown';
       title.fontSize = 16;
-      title.fills = [{ type: 'SOLID', color: { r: 0.2, g: 0.2, b: 0.2 } }];
+      title.fontName = { family: "Andale Mono", style: "Regular" };
+      title.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }]; // White text for dark background
       scaleFrame.appendChild(title);
       
       // Create color swatches container
@@ -1471,7 +1477,8 @@ async function createColorScales(parentFrame: FrameNode, palette: PaletteData, s
         const label = figma.createText();
         label.characters = scaleSteps[j] || '000';
         label.fontSize = 10;
-        label.fills = [{ type: 'SOLID', color: { r: 0.2, g: 0.2, b: 0.2 } }];
+        label.fontName = { family: "Andale Mono", style: "Regular" };
+        label.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }]; // White text for dark background
         labelContainer.appendChild(label);
         
         swatchContainer.appendChild(labelContainer);
@@ -1537,7 +1544,8 @@ async function createHarmonyPalettes(parentFrame: FrameNode, palette: PaletteDat
       const title = figma.createText();
       title.characters = harmonyType.name || 'Unknown';
       title.fontSize = 14;
-      title.fills = [{ type: 'SOLID', color: { r: 0.2, g: 0.2, b: 0.2 } }];
+      title.fontName = { family: "Andale Mono", style: "Regular" };
+      title.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }]; // White text for dark background
       harmonyFrame.appendChild(title);
       
       // Create harmony color swatches container
@@ -1607,7 +1615,8 @@ async function createModeSpecificFrames(parentFrame: FrameNode, palette: Palette
     const lightTitle = figma.createText();
     lightTitle.characters = settings.accessibility ? "Light Mode (WCAG Accessible)" : "Light Mode";
     lightTitle.fontSize = 18;
-    lightTitle.fills = [{ type: 'SOLID', color: { r: 0.2, g: 0.2, b: 0.2 } }];
+    lightTitle.fontName = { family: "Andale Mono", style: "Regular" };
+    lightTitle.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }]; // White text for dark background
     lightFrame.appendChild(lightTitle);
     
     // Create light mode color swatches container
@@ -1683,7 +1692,8 @@ async function createModeSpecificFrames(parentFrame: FrameNode, palette: Palette
       const label = figma.createText();
       label.characters = `L${i + 1}`;
       label.fontSize = 10;
-      label.fills = [{ type: 'SOLID', color: { r: 0.2, g: 0.2, b: 0.2 } }];
+      label.fontName = { family: "Andale Mono", style: "Regular" };
+      label.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }]; // White text for dark background
       labelContainer.appendChild(label);
       
       swatchContainer.appendChild(labelContainer);
@@ -1710,6 +1720,7 @@ async function createModeSpecificFrames(parentFrame: FrameNode, palette: Palette
     const darkTitle = figma.createText();
     darkTitle.characters = settings.accessibility ? "Dark Mode (WCAG Accessible)" : "Dark Mode";
     darkTitle.fontSize = 18;
+    darkTitle.fontName = { family: "Andale Mono", style: "Regular" };
     darkTitle.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
     darkFrame.appendChild(darkTitle);
     
@@ -1786,6 +1797,7 @@ async function createModeSpecificFrames(parentFrame: FrameNode, palette: Palette
       const label = figma.createText();
       label.characters = `D${i + 1}`;
       label.fontSize = 10;
+      label.fontName = { family: "Andale Mono", style: "Regular" };
       label.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }]; // White text color for dark mode
       labelContainer.appendChild(label);
       
@@ -1829,7 +1841,8 @@ async function createMonotoneScale(parentFrame: FrameNode): Promise<void> {
     const title = figma.createText();
     title.characters = "Monotone Scale";
     title.fontSize = 14;
-    title.fills = [{ type: 'SOLID', color: { r: 0.2, g: 0.2, b: 0.2 } }];
+    title.fontName = { family: "Andale Mono", style: "Regular" };
+    title.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }]; // White text for dark background
     monotoneFrame.appendChild(title);
     
     // Create monotone swatches container
@@ -1896,7 +1909,8 @@ async function createMonotoneScale(parentFrame: FrameNode): Promise<void> {
       const label = figma.createText();
       label.characters = `${i * 100}`;
       label.fontSize = 10;
-      label.fills = [{ type: 'SOLID', color: { r: 0.2, g: 0.2, b: 0.2 } }];
+      label.fontName = { family: "Andale Mono", style: "Regular" };
+      label.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }]; // White text for dark background
       labelContainer.appendChild(label);
       
       swatchContainer.appendChild(labelContainer);
