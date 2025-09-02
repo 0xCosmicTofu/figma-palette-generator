@@ -12,51 +12,60 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #ffffff;
-            color: #333333;
+            font-family: 'Andale Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+            background: #0f0f0f;
+            color: #eaeaea;
             line-height: 1.5;
         }
 
         .container {
-            padding: 20px;
+            padding: 24px;
             max-width: 100%;
         }
 
         .header {
-            text-align: center;
-            margin-bottom: 24px;
+            text-align: left;
+            margin-bottom: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
 
+        .header .title-line {
+            display: flex;
+            gap: 8px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.8);
+        }
         .header h1 {
-            font-size: 20px;
+            font-size: 14px;
             font-weight: 600;
-            color: #000000;
-            margin-bottom: 8px;
+            color: #ffffff;
         }
 
         .header p {
             font-size: 14px;
-            color: #666666;
+            line-height: 1.25;
+            color: #ffffff;
         }
 
         .instructions {
-            background: #f5f5f5;
-            border-radius: 8px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 2px;
             padding: 16px;
             margin-bottom: 24px;
         }
 
         .instructions h3 {
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 600;
             margin-bottom: 8px;
-            color: #000000;
+            color: rgba(255,255,255,0.8);
         }
 
         .instructions ol {
-            font-size: 13px;
-            color: #666666;
+            font-size: 14px;
+            color: #ffffff;
             padding-left: 20px;
         }
 
@@ -77,24 +86,24 @@
             font-size: 13px;
             font-weight: 500;
             margin-bottom: 8px;
-            color: #000000;
+            color: #eaeaea;
         }
 
         .setting-group select,
         .setting-group input[type="range"] {
             width: 100%;
             padding: 8px 12px;
-            border: 1px solid #e0e0e0;
+            border: 1px solid #2a2a2a;
             border-radius: 6px;
             font-size: 13px;
-            background: #ffffff;
+            background: #111;
         }
 
         .setting-group select:focus,
         .setting-group input[type="range"]:focus {
             outline: none;
             border-color: #18a0fb;
-            box-shadow: 0 0 0 2px rgba(24, 160, 251, 0.2);
+            box-shadow: 0 0 0 2px rgba(24, 160, 251, 0.15);
         }
 
         .toggle-group {
@@ -124,7 +133,7 @@
             left: 2px;
             width: 20px;
             height: 20px;
-            background: #ffffff;
+            background: #0f0f0f;
             border-radius: 50%;
             transition: transform 0.3s;
         }
@@ -167,45 +176,40 @@
 
         .actions {
             display: flex;
+            flex-direction: column;
             gap: 12px;
+            margin-top: 8px;
         }
 
         .btn {
-            flex: 1;
-            padding: 12px 16px;
+            width: 100%;
+            padding: 12px 0;
             border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 400;
+            font-family: 'Andale Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: none;
         }
 
         .btn-primary {
-            background: #18a0fb;
+            background: #ffffff;
+            color: #000000;
+        }
+
+        .btn-primary:hover { background: #ffffff; }
+
+        .btn-primary:active { background: #ffffff; }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
             color: #ffffff;
         }
 
-        .btn-primary:hover {
-            background: #0d8ce0;
-        }
+        .btn-secondary:hover { background: rgba(255,255,255,0.1); }
 
-        .btn-primary:active {
-            background: #0b7bc7;
-        }
-
-        .btn-secondary {
-            background: #f5f5f5;
-            color: #666666;
-        }
-
-        .btn-secondary:hover {
-            background: #e8e8e8;
-        }
-
-        .btn-secondary:active {
-            background: #dcdcdc;
-        }
+        .btn-secondary:active { background: rgba(255,255,255,0.1); }
 
         .btn:disabled {
             opacity: 0.5;
@@ -219,24 +223,27 @@
             font-size: 13px;
             text-align: center;
             display: none;
+            background: #151515;
+            border: 1px solid #2a2a2a;
+            color: #eaeaea;
         }
 
         .status.success {
-            background: #e8f5e8;
-            color: #2d5a2d;
-            border: 1px solid #c3e6c3;
+            background: #0f1f14;
+            color: #a6e3b7;
+            border: 1px solid #1f3a27;
         }
 
         .status.error {
-            background: #ffe8e8;
-            color: #5a2d2d;
-            border: 1px solid #e6c3c3;
+            background: #2a1212;
+            color: #ffb4b4;
+            border: 1px solid #4a1f1f;
         }
 
         .status.info {
-            background: #e8f0ff;
-            color: #2d4a5a;
-            border: 1px solid #c3d6e6;
+            background: #0f1824;
+            color: #9fc2ff;
+            border: 1px solid #1c2b40;
         }
 
         .progress {
@@ -247,7 +254,7 @@
         .progress-bar {
             width: 100%;
             height: 4px;
-            background: #f0f0f0;
+            background: #222;
             border-radius: 2px;
             overflow: hidden;
         }
@@ -354,7 +361,7 @@
             width: 48px;
             height: 48px;
             border-radius: 8px;
-            border: 2px solid #fff;
+            border: 2px solid #2a2a2a;
             box-shadow: 0 2px 8px rgba(0,0,0,0.15);
             position: relative;
         }
@@ -432,11 +439,11 @@
         }
 
         .color-value {
-            font-family: 'SF Mono', Monaco, monospace;
+            font-family: 'Andale Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
             font-size: 14px;
             font-weight: 500;
-            color: #333;
-            background: #f0f0f0;
+            color: #eaeaea;
+            background: #1a1a1a;
             padding: 8px 12px;
             border-radius: 4px;
             min-width: 80px;
@@ -447,7 +454,7 @@
         .color-extraction-section {
             margin-bottom: 24px;
             padding: 16px;
-            background: #f9f9f9;
+            background: #161616;
             border-radius: 8px;
         }
 
@@ -552,9 +559,9 @@
         .selection-status {
             text-align: center;
             padding: 12px;
-            background: #fff;
+            background: #141414;
             border-radius: 6px;
-            border: 1px solid #e0e0e0;
+            border: 1px solid #2a2a2a;
         }
 
         .selection-indicator {
@@ -564,7 +571,7 @@
         }
 
         .selection-status.active {
-            background: #e8f4fd;
+            background: #0f1a22;
             border-color: #18a0fb;
         }
 
@@ -650,8 +657,8 @@
         }
 
         .color-picker-interface {
-            background: #fff;
-            border: 1px solid #e0e0e0;
+            background: #111;
+            border: 1px solid #2a2a2a;
             border-radius: 8px;
             padding: 16px;
         }
@@ -820,24 +827,24 @@
 
         /* Color Selection Styles */
         .section {
-            background: #ffffff;
+            background: #141414;
             border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 16px;
-            border: 1px solid #e5e5e5;
+            padding: 12px;
+            margin-bottom: 12px;
+            border: 1px solid #2a2a2a;
         }
 
         .section h3 {
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 600;
-            margin-bottom: 16px;
-            color: #333;
+            margin-bottom: 12px;
+            color: #eaeaea;
         }
 
         .selection-progress {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 20px;
+            margin-bottom: 12px;
             padding: 0 8px;
         }
 
@@ -856,7 +863,7 @@
             right: -50%;
             width: 100%;
             height: 2px;
-            background: #e5e5e5;
+            background: #2a2a2a;
             z-index: 1;
         }
 
@@ -865,17 +872,17 @@
         }
 
         .step-number {
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
-            background: #e5e5e5;
-            color: #666;
+            background: #2a2a2a;
+            color: #bbb;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             position: relative;
             z-index: 2;
         }
@@ -892,7 +899,7 @@
 
         .step-label {
             font-size: 12px;
-            color: #666;
+            color: #a0a0a0;
             text-align: center;
         }
 
@@ -903,24 +910,25 @@
 
         .extracted-colors {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-            gap: 12px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
         }
 
         .extracted-color {
             aspect-ratio: 1;
             border-radius: 8px;
-            border: 2px solid #e5e5e5;
+            border: 2px solid #2a2a2a;
             cursor: pointer;
             transition: all 0.2s ease;
             position: relative;
             overflow: hidden;
+            background: #1a1a1a;
         }
 
         .extracted-color:hover {
-            border-color: #007AFF;
-            transform: scale(1.05);
+            border-color: #3a3a3a;
+            transform: none;
         }
 
         .extracted-color.selected {
@@ -947,18 +955,7 @@
             box-shadow: 0 0 0 2px rgba(52, 199, 89, 0.2);
         }
 
-        .color-label {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            font-size: 10px;
-            padding: 4px;
-            text-align: center;
-            font-weight: 600;
-        }
+        /* Removed percentage labels under swatches */
 
         .selection-status {
             text-align: center;
@@ -970,7 +967,7 @@
 
         .selection-status p {
             font-size: 14px;
-            color: #666;
+            color: #a0a0a0;
             margin: 0;
         }
 
@@ -1086,23 +1083,23 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎨 Palette Generator</h1>
-            <p>Extract colors from your image and build a complete design system</p>
+            <div class="title-line"><span>VER 1.0</span><span>PALETTE GENERATOR</span></div>
+            <h1>Extract colours from your image(s) and build a comprehensive colour system</h1>
         </div>
 
         <div class="instructions">
-            <h3>How to use:</h3>
+            <h3>HOW TO USE</h3>
             <ol>
-                <li>Select one or more rectangles with image fills in Figma (max 10 for performance)</li>
-                <li>Click "Extract Colors from Image" to analyze the images</li>
-                <li>Select your primary, secondary, and tertiary colors from the extracted colors</li>
-                <li>Generate your complete design system</li>
+                <li>Select one or more images (there’s a max limit of 10 for performance).</li>
+                <li>Click on “Extract Colours” to analyze the images.</li>
+                <li>Select your primary, secondary, and tertiary colours from the extracted colours.</li>
+                <li>Generate your colour palette.</li>
             </ol>
         </div>
 
         <!-- Color Selection Section -->
         <div id="color-selection-section" class="section" style="display: none;">
-            <h3>Select Your Colors</h3>
+            <h3>Select Your Colours</h3>
             <div id="selection-progress" class="selection-progress">
                 <div class="progress-step active" data-step="1">
                     <span class="step-number">1</span>
@@ -1123,7 +1120,7 @@
             </div>
             
             <div id="selection-status" class="selection-status">
-                <p>Click on a color to select it as your primary color</p>
+                <p>Click on a colour to select it as your primary colour</p>
             </div>
         </div>
 
@@ -1267,7 +1264,7 @@
         </div>
 
         <div class="actions">
-            <button class="btn btn-primary" id="generateBtn">Extract Colors from Images</button>
+            <button class="btn btn-primary" id="generateBtn">Extract Colours</button>
             <button class="btn btn-secondary" id="cancelBtn">Cancel</button>
         </div>
 
@@ -1634,10 +1631,10 @@
         document.getElementById('generateBtn').addEventListener('click', () => {
             const btnText = document.getElementById('generateBtn').textContent;
             
-            if (btnText === 'Extract Colors from Images') {
+            if (btnText === 'Extract Colours') {
                 // Extract colors from selected image
                 showProgress();
-                showStatus('Extracting colors from your images...', 'info');
+                showStatus('Extracting colours (Max 10 images)', 'info');
 
                 parent.postMessage({
                     pluginMessage: {
@@ -1732,13 +1729,8 @@
         // Handle received image bytes for pixel analysis
         // Handle multi-image selection notification
         function handleMultiImageSelected(imageCount, totalSelected) {
-            console.log(`Processing ${imageCount} valid images out of ${totalSelected} selected`);
-            
-            if (totalSelected > imageCount) {
-                showStatus(`Processing ${imageCount} valid images (${totalSelected - imageCount} invalid images skipped)`, 'info');
-            } else if (imageCount > 1) {
-                showStatus(`Processing ${imageCount} images for combined color palette`, 'info');
-            }
+            console.log(`Multi-image selection: ${imageCount}/${totalSelected}`);
+            showStatus('Extracting colours (Max 10 images)', 'info');
         }
 
         function handleImageBytesReceived(imageBytes, imageHash, multiImage = false, imageCount = 1) {
@@ -2319,24 +2311,22 @@
             const extractedColorsContainer = document.getElementById('extracted-colors');
             extractedColorsContainer.innerHTML = '';
             
-            primaryCandidates.forEach((candidate, index) => {
+            // Always render a fixed 2x4 grid (8 slots) with placeholders
+            const totalSlots = 8;
+            for (let i = 0; i < totalSlots; i++) {
+                const candidate = primaryCandidates[i];
                 const colorDiv = document.createElement('div');
                 colorDiv.className = 'extracted-color';
-                colorDiv.style.backgroundColor = candidate.hex;
-                colorDiv.dataset.index = index;
-                colorDiv.dataset.color = JSON.stringify(candidate.color);
-                
-                // Add score label
-                const label = document.createElement('div');
-                label.className = 'color-label';
-                label.textContent = `${(candidate.score * 100).toFixed(0)}%`;
-                colorDiv.appendChild(label);
-                
-                // Add click handler
-                colorDiv.addEventListener('click', () => selectExtractedColor(candidate, index));
-                
+                if (candidate) {
+                    colorDiv.style.backgroundColor = candidate.hex;
+                    colorDiv.dataset.index = String(i);
+                    colorDiv.dataset.color = JSON.stringify(candidate.color);
+                    colorDiv.addEventListener('click', () => selectExtractedColor(candidate, i));
+                } else {
+                    colorDiv.classList.add('placeholder');
+                }
                 extractedColorsContainer.appendChild(colorDiv);
-            });
+            }
             
             // Reset selection state
             window.selectedColors = { primary: null, secondary: null, tertiary: null };
