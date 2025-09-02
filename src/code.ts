@@ -1293,11 +1293,13 @@ async function createPaletteFrames(palette: PaletteData, settings: PaletteSettin
     console.log('Starting palette frame creation...');
     
     // Load fonts first (required for text nodes)
+    let fontFamily = { family: "Andale Mono", style: "Regular" };
     try {
       await figma.loadFontAsync({ family: "Andale Mono", style: "Regular" });
       console.log('Andale Mono font loaded successfully');
     } catch (error) {
       console.warn('Andale Mono font not available, falling back to Inter');
+      fontFamily = { family: "Inter", style: "Regular" };
       await figma.loadFontAsync({ family: "Inter", style: "Regular" });
     }
     
@@ -1327,19 +1329,19 @@ async function createPaletteFrames(palette: PaletteData, settings: PaletteSettin
     
     console.log('Creating color scales...');
     // Create color scale frames
-    await createColorScales(mainFrame, palette, settings);
+    await createColorScales(mainFrame, palette, settings, fontFamily);
     
     console.log('Creating harmony palettes...');
     // Create harmony frames
-    await createHarmonyPalettes(mainFrame, palette, settings);
+    await createHarmonyPalettes(mainFrame, palette, settings, fontFamily);
     
     console.log('Creating light and dark mode frames...');
     // Create light and dark mode frames
-    await createModeSpecificFrames(mainFrame, palette, settings);
+    await createModeSpecificFrames(mainFrame, palette, settings, fontFamily);
     
     console.log('Creating monotone scale...');
     // Create monotone scale
-    await createMonotoneScale(mainFrame);
+    await createMonotoneScale(mainFrame, fontFamily);
     
     console.log('All frames created, scrolling to view...');
     // Auto-layout the frames
@@ -1360,7 +1362,7 @@ async function createPaletteFrames(palette: PaletteData, settings: PaletteSettin
 /**
  * Create color scale frames
  */
-async function createColorScales(parentFrame: FrameNode, palette: PaletteData, settings: PaletteSettings): Promise<void> {
+async function createColorScales(parentFrame: FrameNode, palette: PaletteData, settings: PaletteSettings, fontFamily: { family: string, style: string }): Promise<void> {
   try {
     console.log('Creating color scales for palette:', palette);
     
@@ -1392,7 +1394,7 @@ async function createColorScales(parentFrame: FrameNode, palette: PaletteData, s
       const title = figma.createText();
       title.characters = scaleNames[i] || 'Unknown';
       title.fontSize = 16;
-      title.fontName = { family: "Andale Mono", style: "Regular" };
+      title.fontName = fontFamily;
       title.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }]; // White text for dark background
       scaleFrame.appendChild(title);
       
@@ -1477,7 +1479,7 @@ async function createColorScales(parentFrame: FrameNode, palette: PaletteData, s
         const label = figma.createText();
         label.characters = scaleSteps[j] || '000';
         label.fontSize = 10;
-        label.fontName = { family: "Andale Mono", style: "Regular" };
+        label.fontName = fontFamily;
         label.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }]; // White text for dark background
         labelContainer.appendChild(label);
         
@@ -1499,7 +1501,7 @@ async function createColorScales(parentFrame: FrameNode, palette: PaletteData, s
 /**
  * Create harmony palette frames
  */
-async function createHarmonyPalettes(parentFrame: FrameNode, palette: PaletteData, settings: PaletteSettings): Promise<void> {
+async function createHarmonyPalettes(parentFrame: FrameNode, palette: PaletteData, settings: PaletteSettings, fontFamily: { family: string, style: string }): Promise<void> {
   try {
     console.log('Creating harmony palettes for palette:', palette);
     
@@ -1544,7 +1546,7 @@ async function createHarmonyPalettes(parentFrame: FrameNode, palette: PaletteDat
       const title = figma.createText();
       title.characters = harmonyType.name || 'Unknown';
       title.fontSize = 14;
-      title.fontName = { family: "Andale Mono", style: "Regular" };
+      title.fontName = fontFamily;
       title.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }]; // White text for dark background
       harmonyFrame.appendChild(title);
       
@@ -1591,7 +1593,7 @@ async function createHarmonyPalettes(parentFrame: FrameNode, palette: PaletteDat
 /**
  * Create light and dark mode specific frames
  */
-async function createModeSpecificFrames(parentFrame: FrameNode, palette: PaletteData, settings: PaletteSettings): Promise<void> {
+async function createModeSpecificFrames(parentFrame: FrameNode, palette: PaletteData, settings: PaletteSettings, fontFamily: { family: string, style: string }): Promise<void> {
   try {
     console.log('Creating light and dark mode frames...');
     
@@ -1615,7 +1617,7 @@ async function createModeSpecificFrames(parentFrame: FrameNode, palette: Palette
     const lightTitle = figma.createText();
     lightTitle.characters = settings.accessibility ? "Light Mode (WCAG Accessible)" : "Light Mode";
     lightTitle.fontSize = 18;
-    lightTitle.fontName = { family: "Andale Mono", style: "Regular" };
+    lightTitle.fontName = fontFamily;
     lightTitle.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }]; // White text for dark background
     lightFrame.appendChild(lightTitle);
     
@@ -1720,7 +1722,7 @@ async function createModeSpecificFrames(parentFrame: FrameNode, palette: Palette
     const darkTitle = figma.createText();
     darkTitle.characters = settings.accessibility ? "Dark Mode (WCAG Accessible)" : "Dark Mode";
     darkTitle.fontSize = 18;
-    darkTitle.fontName = { family: "Andale Mono", style: "Regular" };
+    darkTitle.fontName = fontFamily;
     darkTitle.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
     darkFrame.appendChild(darkTitle);
     
@@ -1818,7 +1820,7 @@ async function createModeSpecificFrames(parentFrame: FrameNode, palette: Palette
 /**
  * Create monotone scale
  */
-async function createMonotoneScale(parentFrame: FrameNode): Promise<void> {
+async function createMonotoneScale(parentFrame: FrameNode, fontFamily: { family: string, style: string }): Promise<void> {
   try {
     console.log('Creating monotone scale...');
     
