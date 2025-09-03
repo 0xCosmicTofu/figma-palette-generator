@@ -1292,37 +1292,51 @@ async function createPaletteFrames(palette: PaletteData, settings: PaletteSettin
   try {
     console.log('Starting palette frame creation...');
     
-    // Load fonts first - try system mono fonts for cross-platform compatibility
-    let fontFamily = { family: "Inter", style: "Regular" };
+    // Load fonts first - try system fonts for cross-platform compatibility
+    let fontFamily = { family: "Arial", style: "Regular" }; // Universal fallback
     
-    // Try common system mono fonts across platforms
-    const systemMonoFonts = [
+    // Try fonts in order of preference (mono fonts first, then universal fonts)
+    const systemFonts = [
       "SF Mono",           // macOS system mono
       "Consolas",          // Windows system mono  
       "Ubuntu Mono",       // Linux Ubuntu
       "Roboto Mono",       // Android/Google
       "Menlo",            // macOS fallback
       "Monaco",           // macOS older systems
-      "Courier New"       // Universal fallback
+      "Courier New",      // Universal mono fallback
+      "Arial",            // Universal sans-serif fallback
+      "Helvetica"         // macOS/Unix fallback
     ];
     
-    let loadedMonoFont = false;
-    for (const monoFont of systemMonoFonts) {
+    let loadedFont = false;
+    for (const font of systemFonts) {
       try {
-        await figma.loadFontAsync({ family: monoFont, style: "Regular" });
-        fontFamily = { family: monoFont, style: "Regular" };
-        console.log(`Successfully loaded system mono font: ${monoFont}`);
-        loadedMonoFont = true;
+        console.log(`Attempting to load font: ${font}`);
+        await figma.loadFontAsync({ family: font, style: "Regular" });
+        fontFamily = { family: font, style: "Regular" };
+        console.log(`Successfully loaded system font: ${font}`);
+        loadedFont = true;
         break;
       } catch (error) {
-        console.log(`${monoFont} not available, trying next...`);
+        console.log(`${font} not available, trying next... Error:`, error);
       }
     }
     
-    // Fallback to Inter if no mono fonts available
-    if (!loadedMonoFont) {
-      console.warn('No system mono fonts available, falling back to Inter');
-      await figma.loadFontAsync({ family: "Inter", style: "Regular" });
+    // This should never happen as Arial/Helvetica/sans-serif are universal
+    if (!loadedFont) {
+      console.error('Could not load any system fonts');
+      throw new Error('Unable to load any suitable font for the plugin');
+    }
+    
+    console.log('Final fontFamily being used:', fontFamily);
+    
+    // Verify the font is actually loaded by trying to load it again
+    try {
+      await figma.loadFontAsync(fontFamily);
+      console.log('Font verification successful:', fontFamily);
+    } catch (verifyError) {
+      console.error('Font verification failed:', verifyError);
+      throw new Error(`Font ${fontFamily.family} failed verification after loading`);
     }
     
     // Create main container frame
@@ -1397,10 +1411,11 @@ async function createColorScales(parentFrame: FrameNode, palette: PaletteData, s
     for (let i = 0; i < scaleNames.length; i++) {
       console.log(`Creating scale ${i}: ${scaleNames[i]}`);
       
-      const scaleFrame = figma.createFrame();
-      scaleFrame.name = `${scaleNames[i]} Color Scale`;
-      scaleFrame.resize(564, 84);
-      scaleFrame.fills = [{ type: 'SOLID', color: { r: 0.949, g: 0.949, b: 0.949 } }]; // #f2f2f2
+      try {
+        const scaleFrame = figma.createFrame();
+        scaleFrame.name = `${scaleNames[i]} Color Scale`;
+        scaleFrame.resize(564, 84);
+        scaleFrame.fills = []; // Transparent background
       
       // Enable Auto Layout for color scale frame
       scaleFrame.layoutMode = "VERTICAL";
@@ -1414,9 +1429,9 @@ async function createColorScales(parentFrame: FrameNode, palette: PaletteData, s
       
       // Add title
       const title = figma.createText();
-      title.characters = scaleNames[i] || 'Unknown';
-      title.fontSize = 16;
       title.fontName = fontFamily;
+      title.fontSize = 16;
+      title.characters = scaleNames[i] || 'Unknown';
       title.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }]; // White text for dark background
       scaleFrame.appendChild(title);
       
@@ -1499,9 +1514,9 @@ async function createColorScales(parentFrame: FrameNode, palette: PaletteData, s
         
         // Add color label
         const label = figma.createText();
-        label.characters = scaleSteps[j] || '000';
-        label.fontSize = 10;
         label.fontName = fontFamily;
+        label.fontSize = 10;
+        label.characters = scaleSteps[j] || '000';
         label.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }]; // White text for dark background
         labelContainer.appendChild(label);
         
@@ -1509,8 +1524,17 @@ async function createColorScales(parentFrame: FrameNode, palette: PaletteData, s
         swatchesContainer.appendChild(swatchContainer);
       }
       
-      parentFrame.appendChild(scaleFrame);
-      console.log(`Scale ${scaleNames[i]} created successfully`);
+        parentFrame.appendChild(scaleFrame);
+        console.log(`Scale ${scaleNames[i]} created successfully`);
+      
+      } catch (scaleError) {
+        console.error(`Error creating scale ${i} (${scaleNames[i]}):`, scaleError);
+        console.error('Error message:', scaleError instanceof Error ? scaleError.message : 'Unknown error');
+        console.error('Error stack:', scaleError instanceof Error ? scaleError.stack : 'No stack trace');
+        console.error('Scale data JSON:', JSON.stringify(scales[i], null, 2));
+        console.error('Palette scales structure JSON:', JSON.stringify(palette.scales, null, 2));
+        throw scaleError;
+      }
     }
     
     console.log('All color scales created successfully');
@@ -1552,7 +1576,7 @@ async function createHarmonyPalettes(parentFrame: FrameNode, palette: PaletteDat
       const harmonyFrame = figma.createFrame();
       harmonyFrame.name = `${harmonyType.name || 'Unknown'} Harmony`;
       harmonyFrame.resize(250, 150);
-      harmonyFrame.fills = [{ type: 'SOLID', color: { r: 0.98, g: 0.98, b: 0.98 } }];
+      harmonyFrame.fills = []; // Transparent background
       
       // Enable Auto Layout for harmony frame
       harmonyFrame.layoutMode = "VERTICAL";
@@ -1566,9 +1590,9 @@ async function createHarmonyPalettes(parentFrame: FrameNode, palette: PaletteDat
       
       // Add title
       const title = figma.createText();
-      title.characters = harmonyType.name || 'Unknown';
-      title.fontSize = 14;
       title.fontName = fontFamily;
+      title.fontSize = 14;
+      title.characters = harmonyType.name || 'Unknown';
       title.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }]; // White text for dark background
       harmonyFrame.appendChild(title);
       
@@ -1623,7 +1647,7 @@ async function createModeSpecificFrames(parentFrame: FrameNode, palette: Palette
     const lightFrame = figma.createFrame();
     lightFrame.name = "Light Mode Palette";
     lightFrame.resize(600, 400);
-    lightFrame.fills = [{ type: 'SOLID', color: { r: 0.98, g: 0.98, b: 0.98 } }];
+    lightFrame.fills = []; // Transparent background
     
     // Enable Auto Layout for light mode frame
     lightFrame.layoutMode = "VERTICAL";
@@ -1637,9 +1661,9 @@ async function createModeSpecificFrames(parentFrame: FrameNode, palette: Palette
     
     // Add title
     const lightTitle = figma.createText();
-    lightTitle.characters = settings.accessibility ? "Light Mode (WCAG Accessible)" : "Light Mode";
-    lightTitle.fontSize = 18;
     lightTitle.fontName = fontFamily;
+    lightTitle.fontSize = 18;
+    lightTitle.characters = settings.accessibility ? "Light Mode (WCAG Accessible)" : "Light Mode";
     lightTitle.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }]; // White text for dark background
     lightFrame.appendChild(lightTitle);
     
@@ -1714,9 +1738,9 @@ async function createModeSpecificFrames(parentFrame: FrameNode, palette: Palette
       
       // Add color labels
       const label = figma.createText();
-      label.characters = `L${i + 1}`;
+      label.fontName = fontFamily;
       label.fontSize = 10;
-      label.fontName = { family: "Andale Mono", style: "Regular" };
+      label.characters = `L${i + 1}`;
       label.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }]; // White text for dark background
       labelContainer.appendChild(label);
       
@@ -1742,9 +1766,9 @@ async function createModeSpecificFrames(parentFrame: FrameNode, palette: Palette
     
     // Add title
     const darkTitle = figma.createText();
-    darkTitle.characters = settings.accessibility ? "Dark Mode (WCAG Accessible)" : "Dark Mode";
-    darkTitle.fontSize = 18;
     darkTitle.fontName = fontFamily;
+    darkTitle.fontSize = 18;
+    darkTitle.characters = settings.accessibility ? "Dark Mode (WCAG Accessible)" : "Dark Mode";
     darkTitle.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }];
     darkFrame.appendChild(darkTitle);
     
@@ -1819,9 +1843,9 @@ async function createModeSpecificFrames(parentFrame: FrameNode, palette: Palette
       
       // Add color labels
       const label = figma.createText();
-      label.characters = `D${i + 1}`;
+      label.fontName = fontFamily;
       label.fontSize = 10;
-      label.fontName = { family: "Andale Mono", style: "Regular" };
+      label.characters = `D${i + 1}`;
       label.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }]; // White text color for dark mode
       labelContainer.appendChild(label);
       
@@ -1849,7 +1873,7 @@ async function createMonotoneScale(parentFrame: FrameNode, fontFamily: { family:
     const monotoneFrame = figma.createFrame();
     monotoneFrame.name = "Monotone Scale";
     monotoneFrame.resize(300, 150);
-    monotoneFrame.fills = [{ type: 'SOLID', color: { r: 0.95, g: 0.95, b: 0.95 } }];
+    monotoneFrame.fills = []; // Transparent background
     
     // Enable Auto Layout for monotone frame
     monotoneFrame.layoutMode = "VERTICAL";
@@ -1863,9 +1887,9 @@ async function createMonotoneScale(parentFrame: FrameNode, fontFamily: { family:
     
     // Add title
     const title = figma.createText();
-    title.characters = "Monotone Scale";
+    title.fontName = fontFamily;
     title.fontSize = 14;
-    title.fontName = { family: "Andale Mono", style: "Regular" };
+    title.characters = "Monotone Scale";
     title.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }]; // White text for dark background
     monotoneFrame.appendChild(title);
     
@@ -1931,9 +1955,9 @@ async function createMonotoneScale(parentFrame: FrameNode, fontFamily: { family:
       
       // Add label
       const label = figma.createText();
-      label.characters = `${i * 100}`;
+      label.fontName = fontFamily;
       label.fontSize = 10;
-      label.fontName = { family: "Andale Mono", style: "Regular" };
+      label.characters = `${i * 100}`;
       label.fills = [{ type: 'SOLID', color: { r: 1, g: 1, b: 1 } }]; // White text for dark background
       labelContainer.appendChild(label);
       
