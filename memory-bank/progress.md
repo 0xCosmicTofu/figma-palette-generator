@@ -1,5 +1,13 @@
 # Progress - Figma Palette Generator
 
+## Today’s Progress (Version 1.0)
+- Fixed persistent font errors; standardized font loading and ordering (fontName before characters).
+- Ensured fallback to system fonts and added verification logging.
+- Set main output frame to #1b1b1b; removed white/light fills from child frames for transparent backgrounds.
+- Added footer credit (Built by Lime Studio) with brand link and color.
+- Replaced WCAG toggle with checkbox; connected to settings; initialized settings safely.
+- Restored CTA behavior by removing conflicting onclick clearing; kept addEventListener pattern.
+
 ## What Works
 - ✅ **Project Setup**: Initialize Figma plugin project structure
 - ✅ **Development Environment**: Configure build tools and development workflow
@@ -10,6 +18,7 @@
 - ✅ **TypeScript Compilation**: All type errors resolved, clean build
 - ✅ **Rich Color Picker UI**: HSL controls, presets, sequential selection workflow
 - ✅ **API Discovery**: Confirmed real pixel access via `getImageByHash` and `getBytesAsync`
+- ✅ **Version 1.0**: Stable end-to-end flow (extract → select → options → generate)
 
 ## What's Left to Build
 

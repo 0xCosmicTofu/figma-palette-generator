@@ -1117,8 +1117,8 @@
         <div class="instructions">
             <h3>HOW TO USE</h3>
             <ol>
-                <li>Select one or more images (there’s a max limit of 10 for performance).</li>
-                <li>Click on “Extract Colours” to analyze the images.</li>
+                <li>Select one or more images (there's a max limit of 10 for performance).</li>
+                <li>Click on "Extract Colours" to analyze the images.</li>
                 <li>Select your primary, secondary, and tertiary colours from the extracted colours.</li>
                 <li>Generate your colour palette.</li>
             </ol>
@@ -1147,7 +1147,13 @@
             <!-- WCAG Accessibility Card -->
             <div id="wcag-card" class="instructions" style="display: none; margin-bottom: 32px;">
                 <div style="font-size: 12px; color: rgba(255,255,255,0.8); margin-bottom: 8px;">WCAG ACCESSIBILITY</div>
-                <div style="font-size: 14px; color: #ffffff;">Select the desired colour scale depth</div>
+                <div style="font-size: 14px; color: #ffffff; margin-bottom: 12px;">Select the desired colour scale depth</div>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <label style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border: 1px solid #444444; border-radius: 4px; cursor: pointer; user-select: none; -webkit-user-select: none;" onclick="toggleWCAGAccessibility(this)" id="wcagAccessibilityOption">
+                        <span style="font-size: 14px; color: #ffffff;">WCAG Accessibility</span>
+                        <div style="width: 14px; height: 14px; border: 1px solid #444444; border-radius: 2px; position: relative;" class="checkbox"></div>
+                    </label>
+                </div>
             </div>
             
             <!-- Palette Settings Card -->
@@ -1233,7 +1239,7 @@
                             <div class="step-color" id="tertiaryColor"></div>
                         </div>
                     </div>
-                </div>
+            </div>
 
                 <!-- Colour Picker Interface -->
                 <div class="color-picker-interface">
@@ -1309,13 +1315,13 @@
 
             <div class="setting-group">
                 <label for="accessibility">WCAG Accessibility:</label>
-                <div class="toggle-group">
-                    <span>Enable contrast checking</span>
-                    <div class="toggle-switch" id="accessibilityToggle">
-                        <input type="checkbox" id="accessibilityCheck" style="display: none;">
-                    </div>
-                </div>
+                <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 8px;">
+                    <label style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border: 1px solid #444444; border-radius: 4px; cursor: pointer; user-select: none; -webkit-user-select: none;" onclick="toggleWCAGAccessibility(this)">
+                        <span style="font-size: 14px; color: #ffffff;">WCAG Accessibility</span>
+                        <div style="width: 14px; height: 14px; border: 1px solid #444444; border-radius: 2px;" class="checkbox" id="wcagCheckbox"></div>
+                    </label>
             </div>
+        </div>
 
             <div class="setting-group">
                 <label for="harmonyTypes">Harmony Types:</label>
@@ -1359,17 +1365,14 @@
     </div>
 
     <script>
-        // Toggle switch functionality
-        const accessibilityToggle = document.getElementById('accessibilityToggle');
-        const accessibilityCheck = document.getElementById('accessibilityCheck');
-
-        accessibilityToggle.addEventListener('click', () => {
-            accessibilityCheck.checked = !accessibilityCheck.checked;
-            accessibilityToggle.classList.toggle('active', accessibilityCheck.checked);
-        });
-
+        // Initialize global settings once (avoid undefined access)
+        window.paletteSettings = window.paletteSettings || { scaleSteps: 9, harmonyTypes: ['analogous'], accessibility: false };
+         
         let primaryColors = [];
         let selectedPrimary = null;
+
+        // Initialize WCAG accessibility setting
+        window.paletteSettings.accessibility = false;
 
         // Primary color selection handlers
         function showPrimarySelection(colors) {
@@ -1731,7 +1734,7 @@
 
             const settings = {
                     scaleSteps: parseInt(document.querySelector('input[name="scaleSteps"]:checked').value),
-                accessibility: accessibilityCheck.checked,
+                accessibility: window.paletteSettings.accessibility || false,
                     harmonyTypes: Array.from(document.querySelectorAll('.checkbox-item input:checked')).map(input => input.value)
             };
 
@@ -2543,11 +2546,9 @@
             document.getElementById('harmony-types-card').style.display = 'block';
         }
 
-        // Global settings
-        window.paletteSettings = {
-            scaleSteps: 9,
-            harmonyTypes: ['analogous']
-        };
+        // Global settings already initialized earlier; ensure defaults remain
+        window.paletteSettings.scaleSteps = window.paletteSettings.scaleSteps ?? 9;
+        window.paletteSettings.harmonyTypes = window.paletteSettings.harmonyTypes ?? ['analogous'];
 
         // Handle palette steps selection
         function selectPaletteSteps(steps, element) {
@@ -2627,6 +2628,52 @@
             console.log('Harmony types selected:', window.paletteSettings.harmonyTypes);
         }
 
+        // Handle WCAG accessibility toggle
+        function toggleWCAGAccessibility(element) {
+            const isChecked = element.classList.contains('checked');
+            
+            if (isChecked) {
+                // Uncheck
+                element.classList.remove('checked');
+                element.style.borderColor = '#444444';
+                const checkmark = element.querySelector('.checkbox svg');
+                if (checkmark) checkmark.remove();
+                
+                // Update settings
+                window.paletteSettings.accessibility = false;
+            } else {
+                // Check
+                element.classList.add('checked');
+                element.style.borderColor = '#69d128';
+                
+                // Add checkmark SVG
+                const checkbox = element.querySelector('.checkbox');
+                const checkmark = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                checkmark.setAttribute('width', '14');
+                checkmark.setAttribute('height', '14');
+                checkmark.setAttribute('viewBox', '0 0 14 14');
+                checkmark.setAttribute('fill', 'none');
+                checkmark.className = 'checkmark';
+                checkmark.style.cssText = 'position: absolute; top: -1px; left: -1px;';
+                
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', 'M4.51953 7.62044L6.37891 9.47982L9.47786 4.52148');
+                path.setAttribute('stroke', '#69D128');
+                path.setAttribute('stroke-width', '1.5');
+                path.setAttribute('stroke-linecap', 'round');
+                path.setAttribute('stroke-linejoin', 'round');
+                
+                checkmark.appendChild(path);
+                checkbox.style.position = 'relative';
+                checkbox.appendChild(checkmark);
+                
+                // Update settings
+                window.paletteSettings.accessibility = true;
+            }
+            
+            console.log('WCAG accessibility:', window.paletteSettings.accessibility ? 'enabled' : 'disabled');
+        }
+
         // Clear all color selections and reset to beginning
         function clearAllSelections() {
             console.log('Clearing all color selections');
@@ -2656,7 +2703,6 @@
             const generateBtn = document.getElementById('generateBtn');
             generateBtn.textContent = 'Extract Colours';
             generateBtn.disabled = false;
-            generateBtn.onclick = null;
         }
 
         // Send selected colors to backend for palette generation

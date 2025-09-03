@@ -97,3 +97,24 @@
 2. **Color Harmony Balance**: How much weight should image colors vs. color theory have?
 3. **User Control**: Should users be able to override algorithm-selected primaries?
 4. **Performance**: Acceptable processing time for pixel analysis?
+
+## Update - Version 1.0 stabilization (today)
+
+- Implemented robust font loading in backend output frames:
+  - Try common system mono fonts; fallback to universally available system fonts.
+  - Ensure fontName is set before characters on all created Text nodes.
+  - Verified font loading and added diagnostics.
+- Output frame visuals aligned to spec:
+  - Main frame background set to #1b1b1b.
+  - Removed light/white fills from child frames (scales, harmonies, light mode, monotone) for transparent backgrounds.
+- UI/UX polishing:
+  - Added footer credit: “Built by Lime Studio” with link and brand color.
+  - Replaced WCAG toggle with checkbox styled like harmony options; wired to settings.
+  - Fixed CTA event handling regression by standardizing on addEventListener and removing conflicting onclick clearing.
+  - Corrected global settings initialization to avoid undefined access (paletteSettings).
+- State flow now confirmed:
+  - Extract Colours → selection (2x4 grid) → options (steps, WCAG, harmonies) → Generate Palette → frames created.
+
+### Next Focus
+- Minor: default checked state option for WCAG (if desired).
+- Continue visual parity sweeps against Figma frames and micro-interaction polish.
