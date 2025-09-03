@@ -195,7 +195,7 @@ async function generatePaletteFromSelectedColors(selectedColors: SelectedColors,
     // Send success message to UI
     figma.ui.postMessage({ type: 'palette-generated' });
     
-    figma.notify('Design system generated successfully!', { error: false });
+    figma.notify('Colour system generated successfully!', { error: false });
     
   } catch (error) {
     console.error('Error generating palette:', error);
